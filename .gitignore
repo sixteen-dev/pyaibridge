@@ -228,3 +228,6 @@ htmlcov/
 # Package management
 pip-selfcheck.json
 pyvenv.cfg
+
+# claude
+.claude/
