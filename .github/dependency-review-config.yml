@@ -1,0 +1,36 @@
+# Dependency Review Configuration
+# https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/configuring-dependency-review
+
+# Fail if any dependencies have vulnerabilities with this severity or higher
+fail-on-severity: high
+
+# Fail if any dependencies are using a license not in this list
+allow-licenses:
+  - MIT
+  - Apache-2.0
+  - BSD-2-Clause
+  - BSD-3-Clause
+  - ISC
+  - 0BSD
+
+# Fail if any dependencies are in this list
+deny-packages:
+  - pkg:pypi/insecure-package@*
+
+# Fail if any dependencies with these scopes are added
+deny-groups:
+  - scope: development
+
+# Comment on PRs with dependency changes
+comment-summary-in-pr: true
+
+# Custom message for PR comments
+comment-summary-message: |
+  ## 🔒 Dependency Review Summary
+  This PR introduces changes to dependencies. Please review the security implications carefully.
+  
+  ### Security Checklist:
+  - [ ] All new dependencies are from trusted sources
+  - [ ] No high/critical vulnerabilities introduced
+  - [ ] License compatibility verified
+  - [ ] Dependencies are pinned to specific versions
