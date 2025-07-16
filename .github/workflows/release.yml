@@ -41,7 +41,7 @@ jobs:
     
     - name: Run security checks
       run: |
-        uv run bandit -r src/ -ll --severity-level medium
+        uv run bandit -r src/ --severity-level medium
         uv run safety scan || true
         uv run pip-audit || true
     
