@@ -1,12 +1,12 @@
 """Exception classes for pyaibridge."""
 
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 
 class PyAIBridgeError(Exception):
     """Base exception for all pyaibridge errors."""
 
-    def __init__(self, message: str, details: Optional[Dict[str, Any]] = None) -> None:
+    def __init__(self, message: str, details: Optional[dict[str, Any]] = None) -> None:
         super().__init__(message)
         self.message = message
         self.details = details or {}
@@ -20,7 +20,7 @@ class ProviderError(PyAIBridgeError):
         message: str,
         provider: str,
         status_code: Optional[int] = None,
-        details: Optional[Dict[str, Any]] = None,
+        details: Optional[dict[str, Any]] = None,
     ) -> None:
         super().__init__(message, details)
         self.provider = provider
@@ -35,7 +35,7 @@ class RateLimitError(ProviderError):
         message: str,
         provider: str,
         retry_after: Optional[float] = None,
-        details: Optional[Dict[str, Any]] = None,
+        details: Optional[dict[str, Any]] = None,
     ) -> None:
         super().__init__(message, provider, 429, details)
         self.retry_after = retry_after
@@ -45,7 +45,7 @@ class AuthenticationError(ProviderError):
     """Exception raised when authentication fails."""
 
     def __init__(
-        self, message: str, provider: str, details: Optional[Dict[str, Any]] = None
+        self, message: str, provider: str, details: Optional[dict[str, Any]] = None
     ) -> None:
         super().__init__(message, provider, 401, details)
 
@@ -54,7 +54,7 @@ class ValidationError(PyAIBridgeError):
     """Exception raised when input validation fails."""
 
     def __init__(
-        self, message: str, field: str, details: Optional[Dict[str, Any]] = None
+        self, message: str, field: str, details: Optional[dict[str, Any]] = None
     ) -> None:
         super().__init__(message, details)
         self.field = field
@@ -64,7 +64,7 @@ class TimeoutError(PyAIBridgeError):
     """Exception raised when operation times out."""
 
     def __init__(
-        self, message: str, timeout: float, details: Optional[Dict[str, Any]] = None
+        self, message: str, timeout: float, details: Optional[dict[str, Any]] = None
     ) -> None:
         super().__init__(message, details)
         self.timeout = timeout

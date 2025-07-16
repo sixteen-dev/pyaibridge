@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import time
 from collections import defaultdict
-from typing import Any, Dict, Optional
+from typing import Any
 
 import structlog
 
@@ -16,9 +16,9 @@ class MetricsCollector:
 
     def __init__(self) -> None:
         """Initialize metrics collector."""
-        self.metrics: Dict[str, Any] = defaultdict(lambda: defaultdict(int))
-        self.timing_metrics: Dict[str, list[float]] = defaultdict(list)
-        self.start_times: Dict[str, float] = {}
+        self.metrics: dict[str, Any] = defaultdict(lambda: defaultdict(int))
+        self.timing_metrics: dict[str, list[float]] = defaultdict(list)
+        self.start_times: dict[str, float] = {}
 
     def increment(self, metric: str, provider: str, value: int = 1) -> None:
         """Increment a counter metric.
@@ -92,7 +92,7 @@ class MetricsCollector:
         self.metrics[provider]["total_cost"] += cost
         self.metrics[provider]["cost_count"] += 1
 
-    def get_metrics(self, provider: Optional[str] = None) -> Dict[str, Any]:
+    def get_metrics(self, provider: str | None = None) -> dict[str, Any]:
         """Get collected metrics.
 
         Args:
@@ -105,7 +105,7 @@ class MetricsCollector:
             return dict(self.metrics.get(provider, {}))
         return dict(self.metrics)
 
-    def get_timing_stats(self, operation: str, provider: str) -> Dict[str, float]:
+    def get_timing_stats(self, operation: str, provider: str) -> dict[str, float]:
         """Get timing statistics for an operation.
 
         Args:
@@ -136,7 +136,7 @@ class MetricsCollector:
         self.start_times.clear()
         logger.info("Metrics reset")
 
-    def get_summary(self) -> Dict[str, Any]:
+    def get_summary(self) -> dict[str, Any]:
         """Get a summary of all metrics.
 
         Returns:

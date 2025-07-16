@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import Any, Callable, Type
+from typing import Any, Callable
 
 import structlog
 from tenacity import (
@@ -27,7 +27,7 @@ class RetryMiddleware:
         min_wait: float = 1.0,
         max_wait: float = 60.0,
         multiplier: float = 2.0,
-        retry_on: tuple[Type[Exception], ...] = (ProviderError, TimeoutError),
+        retry_on: tuple[type[Exception], ...] = (ProviderError, TimeoutError),
         retry_on_rate_limit: bool = True,
     ) -> None:
         """Initialize retry middleware.

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from collections.abc import AsyncGenerator
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from .models import ChatRequest, ChatResponse, ProviderConfig, StreamingChunk
 
@@ -29,7 +29,7 @@ class BaseProvider(ABC):
 
     @property
     @abstractmethod
-    def supported_models(self) -> Dict[str, Dict[str, Any]]:
+    def supported_models(self) -> dict[str, dict[str, Any]]:
         """Return supported models and their capabilities."""
         pass
 
@@ -92,15 +92,17 @@ class BaseProvider(ABC):
         """Async context manager exit."""
         await self.disconnect()
 
+    @abstractmethod
     async def connect(self) -> None:
         """Initialize connection to the provider."""
         pass
 
+    @abstractmethod
     async def disconnect(self) -> None:
         """Clean up connection to the provider."""
         pass
 
-    def get_model_info(self, model: str) -> Dict[str, Any]:
+    def get_model_info(self, model: str) -> dict[str, Any]:
         """Get information about a specific model.
 
         Args:
@@ -130,7 +132,7 @@ class BaseProvider(ABC):
         # Simple estimation: ~4 characters per token
         return len(text) // 4
 
-    def calculate_cost(self, usage: Dict[str, int], model: str) -> Optional[float]:
+    def calculate_cost(self, usage: dict[str, int], model: str) -> Optional[float]:
         """Calculate cost for token usage.
 
         Args:

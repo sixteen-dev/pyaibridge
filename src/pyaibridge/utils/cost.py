@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Dict, Optional
-
 from ..core.base import BaseProvider
 from ..core.models import Usage
 
@@ -19,7 +17,7 @@ class CostCalculator:
         """
         self.provider = provider
 
-    def calculate_usage_cost(self, usage: Usage, model: str) -> Optional[float]:
+    def calculate_usage_cost(self, usage: Usage, model: str) -> float | None:
         """Calculate cost for token usage.
 
         Args:
@@ -48,7 +46,7 @@ class CostCalculator:
 
     def calculate_text_cost(
         self, text: str, model: str, is_prompt: bool = True
-    ) -> Optional[float]:
+    ) -> float | None:
         """Calculate cost for text based on estimated tokens.
 
         Args:
@@ -76,7 +74,7 @@ class CostCalculator:
         except (ValueError, KeyError):
             return None
 
-    def get_model_pricing(self, model: str) -> Optional[Dict[str, float]]:
+    def get_model_pricing(self, model: str) -> dict[str, float] | None:
         """Get pricing information for a model.
 
         Args:

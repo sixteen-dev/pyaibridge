@@ -6,7 +6,7 @@ import json
 import uuid
 from collections.abc import AsyncGenerator
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any
 
 import httpx
 import structlog
@@ -104,7 +104,7 @@ class GoogleProvider(BaseProvider):
         """
         super().__init__(config)
         self.base_url = config.base_url or self.BASE_URL
-        self._client: Optional[httpx.AsyncClient] = None
+        self._client: httpx.AsyncClient | None = None
 
         logger.info("Google Gemini provider initialized", base_url=self.base_url)
 
@@ -114,7 +114,7 @@ class GoogleProvider(BaseProvider):
         return "google"
 
     @property
-    def supported_models(self) -> Dict[str, Dict[str, Any]]:
+    def supported_models(self) -> dict[str, dict[str, Any]]:
         """Return supported models and their capabilities."""
         return self.SUPPORTED_MODELS
 
@@ -163,6 +163,8 @@ class GoogleProvider(BaseProvider):
 
         if self._client is None:
             await self.connect()
+        
+        assert self._client is not None
 
         payload = self._build_payload(request)
         endpoint = f"/models/{request.model}:generateContent"
@@ -201,12 +203,12 @@ class GoogleProvider(BaseProvider):
             data = response.json()
             return self._parse_response(data, request.model)
 
-        except httpx.TimeoutException:
-            raise ProviderError("Request timeout", "google")
+        except httpx.TimeoutException as e:
+            raise ProviderError("Request timeout", "google") from e
         except httpx.RequestError as e:
-            raise ProviderError(f"Request failed: {e}", "google")
+            raise ProviderError(f"Request failed: {e}", "google") from e
 
-    async def stream_chat(
+    async def stream_chat(  # type: ignore[override]
         self, request: ChatRequest
     ) -> AsyncGenerator[StreamingChunk, None]:
         """Generate a streaming chat completion."""
@@ -215,6 +217,8 @@ class GoogleProvider(BaseProvider):
 
         if self._client is None:
             await self.connect()
+        
+        assert self._client is not None
 
         payload = self._build_payload(request)
         endpoint = f"/models/{request.model}:streamGenerateContent"
@@ -259,12 +263,12 @@ class GoogleProvider(BaseProvider):
                         except json.JSONDecodeError:
                             continue
 
-        except httpx.TimeoutException:
-            raise ProviderError("Request timeout", "google")
+        except httpx.TimeoutException as e:
+            raise ProviderError("Request timeout", "google") from e
         except httpx.RequestError as e:
-            raise ProviderError(f"Request failed: {e}", "google")
+            raise ProviderError(f"Request failed: {e}", "google") from e
 
-    def _build_payload(self, request: ChatRequest) -> Dict[str, Any]:
+    def _build_payload(self, request: ChatRequest) -> dict[str, Any]:
         """Build Google Gemini API payload from request."""
         # Convert messages to Google's format
         contents = []
@@ -272,12 +276,12 @@ class GoogleProvider(BaseProvider):
             role = self._convert_role(msg.role)
             contents.append({"role": role, "parts": [{"text": msg.content}]})
 
-        payload = {
+        payload: dict[str, Any] = {
             "contents": contents,
         }
 
         # Add generation config if parameters are provided
-        generation_config = {}
+        generation_config: dict[str, Any] = {}
         if request.max_tokens is not None:
             generation_config["maxOutputTokens"] = request.max_tokens
         if request.temperature is not None:
@@ -306,7 +310,7 @@ class GoogleProvider(BaseProvider):
         else:
             return "user"
 
-    def _parse_response(self, data: Dict[str, Any], model: str) -> ChatResponse:
+    def _parse_response(self, data: dict[str, Any], model: str) -> ChatResponse:
         """Parse Google Gemini API response."""
         if "candidates" not in data or not data["candidates"]:
             raise ProviderError("No candidates in response", "google", details=data)
@@ -340,8 +344,8 @@ class GoogleProvider(BaseProvider):
         )
 
     def _parse_streaming_chunk(
-        self, data: Dict[str, Any], model: str
-    ) -> Optional[StreamingChunk]:
+        self, data: dict[str, Any], model: str
+    ) -> StreamingChunk | None:
         """Parse Google Gemini streaming chunk."""
         if "candidates" not in data or not data["candidates"]:
             return None

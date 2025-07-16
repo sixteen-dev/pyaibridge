@@ -6,7 +6,7 @@ import json
 import uuid
 from collections.abc import AsyncGenerator
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any
 
 import httpx
 import structlog
@@ -124,7 +124,7 @@ class ClaudeProvider(BaseProvider):
         """
         super().__init__(config)
         self.base_url = config.base_url or self.BASE_URL
-        self._client: Optional[httpx.AsyncClient] = None
+        self._client: httpx.AsyncClient | None = None
 
         logger.info("Anthropic Claude provider initialized", base_url=self.base_url)
 
@@ -134,7 +134,7 @@ class ClaudeProvider(BaseProvider):
         return "claude"
 
     @property
-    def supported_models(self) -> Dict[str, Dict[str, Any]]:
+    def supported_models(self) -> dict[str, dict[str, Any]]:
         """Return supported models and their capabilities."""
         return self.SUPPORTED_MODELS
 
@@ -184,6 +184,8 @@ class ClaudeProvider(BaseProvider):
 
         if self._client is None:
             await self.connect()
+        
+        assert self._client is not None
 
         payload = self._build_payload(request)
 
@@ -223,12 +225,12 @@ class ClaudeProvider(BaseProvider):
             data = response.json()
             return self._parse_response(data, request.model)
 
-        except httpx.TimeoutException:
-            raise ProviderError("Request timeout", "claude")
+        except httpx.TimeoutException as e:
+            raise ProviderError("Request timeout", "claude") from e
         except httpx.RequestError as e:
-            raise ProviderError(f"Request failed: {e}", "claude")
+            raise ProviderError(f"Request failed: {e}", "claude") from e
 
-    async def stream_chat(
+    async def stream_chat(  # type: ignore[override]
         self, request: ChatRequest
     ) -> AsyncGenerator[StreamingChunk, None]:
         """Generate a streaming chat completion."""
@@ -237,6 +239,8 @@ class ClaudeProvider(BaseProvider):
 
         if self._client is None:
             await self.connect()
+        
+        assert self._client is not None
 
         payload = self._build_payload(request)
         payload["stream"] = True
@@ -278,17 +282,17 @@ class ClaudeProvider(BaseProvider):
                         except json.JSONDecodeError:
                             continue
 
-        except httpx.TimeoutException:
-            raise ProviderError("Request timeout", "claude")
+        except httpx.TimeoutException as e:
+            raise ProviderError("Request timeout", "claude") from e
         except httpx.RequestError as e:
-            raise ProviderError(f"Request failed: {e}", "claude")
+            raise ProviderError(f"Request failed: {e}", "claude") from e
 
-    def _build_payload(self, request: ChatRequest) -> Dict[str, Any]:
+    def _build_payload(self, request: ChatRequest) -> dict[str, Any]:
         """Build Anthropic Claude API payload from request."""
         # Separate system messages from conversation
         system_messages = []
         conversation_messages = []
-        
+
         for msg in request.messages:
             if msg.role == MessageRole.SYSTEM:
                 system_messages.append(msg.content)
@@ -330,7 +334,7 @@ class ClaudeProvider(BaseProvider):
             # Claude doesn't support system role in messages, handle separately
             return "user"
 
-    def _parse_response(self, data: Dict[str, Any], model: str) -> ChatResponse:
+    def _parse_response(self, data: dict[str, Any], model: str) -> ChatResponse:
         """Parse Anthropic Claude API response."""
         if "content" not in data or not data["content"]:
             raise ProviderError("No content in response", "claude", details=data)
@@ -360,11 +364,11 @@ class ClaudeProvider(BaseProvider):
         )
 
     def _parse_streaming_chunk(
-        self, data: Dict[str, Any], model: str
-    ) -> Optional[StreamingChunk]:
+        self, data: dict[str, Any], model: str
+    ) -> StreamingChunk | None:
         """Parse Anthropic Claude streaming chunk."""
         event_type = data.get("type")
-        
+
         if event_type == "content_block_delta":
             # Extract text delta from content block
             delta = data.get("delta", {})
@@ -379,7 +383,7 @@ class ClaudeProvider(BaseProvider):
                         created=datetime.now(),
                         metadata={"provider": "claude", "raw_chunk": data},
                     )
-        
+
         elif event_type == "message_delta":
             # Check for completion
             delta = data.get("delta", {})

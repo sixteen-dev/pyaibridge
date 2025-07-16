@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from collections.abc import AsyncGenerator
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any, NoReturn, Optional
 
 import httpx
 import structlog
@@ -147,7 +147,7 @@ class XAIProvider(BaseProvider):
         """
         super().__init__(config)
         self.base_url = config.base_url or self.BASE_URL
-        self._client: Optional[httpx.AsyncClient] = None
+        self._client: httpx.AsyncClient | None = None
 
         logger.info("xAI provider initialized", base_url=self.base_url)
 
@@ -157,7 +157,7 @@ class XAIProvider(BaseProvider):
         return "xai"
 
     @property
-    def supported_models(self) -> Dict[str, Dict[str, Any]]:
+    def supported_models(self) -> dict[str, dict[str, Any]]:
         """Return supported models and their capabilities."""
         return self.SUPPORTED_MODELS
 
@@ -210,7 +210,7 @@ class XAIProvider(BaseProvider):
         }
         return role_mapping[role]
 
-    def _prepare_messages(self, messages: list[dict]) -> list[dict]:
+    def _prepare_messages(self, messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """Prepare messages for xAI API.
 
         Args:
@@ -227,7 +227,7 @@ class XAIProvider(BaseProvider):
             })
         return formatted_messages
 
-    def calculate_cost(self, usage: Dict[str, int], model: str) -> float:
+    def calculate_cost(self, usage: dict[str, int], model: str) -> Optional[float]:
         """Calculate the cost for the given usage.
 
         Args:
@@ -244,7 +244,7 @@ class XAIProvider(BaseProvider):
             raise ValueError(f"Model '{model}' is not supported")
 
         model_info = self.SUPPORTED_MODELS[model]
-        pricing = model_info["pricing"]
+        pricing: dict[str, float] = model_info["pricing"]  # type: ignore
 
         prompt_cost = usage.get("prompt_tokens", 0) * pricing["prompt_per_token"]
         completion_cost = usage.get("completion_tokens", 0) * pricing["completion_per_token"]
@@ -273,10 +273,12 @@ class XAIProvider(BaseProvider):
         """
         if not self._client:
             await self.connect()
+        
+        assert self._client is not None
 
         if not await self.validate_model(request.model):
             raise ValidationError(
-                f"Model '{request.model}' is not supported by xAI", 
+                f"Model '{request.model}' is not supported by xAI",
                 field="model"
             )
 
@@ -339,17 +341,17 @@ class XAIProvider(BaseProvider):
             await self._handle_http_error(e)
         except httpx.RequestError as e:
             logger.error("xAI request error", error=str(e))
-            raise ProviderError(f"Request failed: {e}")
+            raise ProviderError(f"Request failed: {e}", "xai") from e
         except (KeyError, ValueError) as e:
             logger.error("xAI response parsing error", error=str(e))
-            raise ProviderError(f"Invalid response format: {e}")
+            raise ProviderError(f"Invalid response format: {e}", "xai") from e
 
     @retry(
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=1, min=4, max=10),
         reraise=True,
     )
-    async def stream_chat(
+    async def stream_chat(  # type: ignore[override]
         self, request: ChatRequest
     ) -> AsyncGenerator[StreamingChunk, None]:
         """Generate a streaming chat completion.
@@ -368,10 +370,12 @@ class XAIProvider(BaseProvider):
         """
         if not self._client:
             await self.connect()
+        
+        assert self._client is not None
 
         if not await self.validate_model(request.model):
             raise ValidationError(
-                f"Model '{request.model}' is not supported by xAI", 
+                f"Model '{request.model}' is not supported by xAI",
                 field="model"
             )
 
@@ -442,9 +446,9 @@ class XAIProvider(BaseProvider):
             await self._handle_http_error(e)
         except httpx.RequestError as e:
             logger.error("xAI streaming request error", error=str(e))
-            raise ProviderError(f"Streaming request failed: {e}")
+            raise ProviderError(f"Streaming request failed: {e}", "xai") from e
 
-    async def _handle_http_error(self, error: httpx.HTTPStatusError) -> None:
+    async def _handle_http_error(self, error: httpx.HTTPStatusError) -> NoReturn:
         """Handle HTTP errors from xAI API.
 
         Args:

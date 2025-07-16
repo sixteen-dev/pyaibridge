@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from collections.abc import AsyncGenerator
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any
 
 import httpx
 import structlog
@@ -140,7 +140,7 @@ class OpenAIProvider(BaseProvider):
         """
         super().__init__(config)
         self.base_url = config.base_url or self.BASE_URL
-        self._client: Optional[httpx.AsyncClient] = None
+        self._client: httpx.AsyncClient | None = None
 
         logger.info("OpenAI provider initialized", base_url=self.base_url)
 
@@ -150,7 +150,7 @@ class OpenAIProvider(BaseProvider):
         return "openai"
 
     @property
-    def supported_models(self) -> Dict[str, Dict[str, Any]]:
+    def supported_models(self) -> dict[str, dict[str, Any]]:
         """Return supported models and their capabilities."""
         return self.SUPPORTED_MODELS
 
@@ -199,6 +199,8 @@ class OpenAIProvider(BaseProvider):
 
         if self._client is None:
             await self.connect()
+        
+        assert self._client is not None
 
         payload = self._build_payload(request)
 
@@ -230,12 +232,12 @@ class OpenAIProvider(BaseProvider):
             data = response.json()
             return self._parse_response(data)
 
-        except httpx.TimeoutException:
-            raise ProviderError("Request timeout", "openai")
+        except httpx.TimeoutException as e:
+            raise ProviderError("Request timeout", "openai") from e
         except httpx.RequestError as e:
-            raise ProviderError(f"Request failed: {e}", "openai")
+            raise ProviderError(f"Request failed: {e}", "openai") from e
 
-    async def stream_chat(
+    async def stream_chat(  # type: ignore[override]
         self, request: ChatRequest
     ) -> AsyncGenerator[StreamingChunk, None]:
         """Generate a streaming chat completion."""
@@ -244,6 +246,8 @@ class OpenAIProvider(BaseProvider):
 
         if self._client is None:
             await self.connect()
+        
+        assert self._client is not None
 
         payload = self._build_payload(request)
         payload["stream"] = True
@@ -287,14 +291,14 @@ class OpenAIProvider(BaseProvider):
                         except json.JSONDecodeError:
                             continue
 
-        except httpx.TimeoutException:
-            raise ProviderError("Request timeout", "openai")
+        except httpx.TimeoutException as e:
+            raise ProviderError("Request timeout", "openai") from e
         except httpx.RequestError as e:
-            raise ProviderError(f"Request failed: {e}", "openai")
+            raise ProviderError(f"Request failed: {e}", "openai") from e
 
-    def _build_payload(self, request: ChatRequest) -> Dict[str, Any]:
+    def _build_payload(self, request: ChatRequest) -> dict[str, Any]:
         """Build OpenAI API payload from request."""
-        payload = {
+        payload: dict[str, Any] = {
             "model": request.model,
             "messages": [
                 {"role": msg.role, "content": msg.content} for msg in request.messages
@@ -318,7 +322,7 @@ class OpenAIProvider(BaseProvider):
 
         return payload
 
-    def _parse_response(self, data: Dict[str, Any]) -> ChatResponse:
+    def _parse_response(self, data: dict[str, Any]) -> ChatResponse:
         """Parse OpenAI API response."""
         choice = data["choices"][0]
         usage_data = data.get("usage", {})
@@ -337,7 +341,7 @@ class OpenAIProvider(BaseProvider):
             metadata={"provider": "openai", "raw_response": data},
         )
 
-    def _parse_streaming_chunk(self, data: Dict[str, Any]) -> Optional[StreamingChunk]:
+    def _parse_streaming_chunk(self, data: dict[str, Any]) -> StreamingChunk | None:
         """Parse OpenAI streaming chunk."""
         if not data.get("choices"):
             return None

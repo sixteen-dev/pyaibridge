@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import time
-from typing import Any, Callable, Optional
+from typing import Any, Callable
 
 import structlog
 
@@ -17,7 +17,7 @@ class RateLimitMiddleware:
     def __init__(
         self,
         requests_per_minute: int = 60,
-        burst_size: Optional[int] = None,
+        burst_size: int | None = None,
     ) -> None:
         """Initialize rate limit middleware.
 

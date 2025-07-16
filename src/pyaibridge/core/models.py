@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -23,7 +23,7 @@ class Message(BaseModel):
     role: MessageRole = Field(..., description="The role of the message sender")
     content: str = Field(..., min_length=1, description="The message content")
     name: Optional[str] = Field(None, description="Optional name of the message sender")
-    metadata: Dict[str, Any] = Field(
+    metadata: dict[str, Any] = Field(
         default_factory=dict, description="Additional metadata"
     )
 
@@ -33,7 +33,7 @@ class Message(BaseModel):
 class ChatRequest(BaseModel):
     """Request for chat completion."""
 
-    messages: List[Message] = Field(..., min_length=1, description="List of messages")
+    messages: list[Message] = Field(..., min_length=1, description="List of messages")
     model: str = Field(..., description="Model to use for completion")
     max_tokens: Optional[int] = Field(
         None, gt=0, description="Maximum tokens to generate"
@@ -50,7 +50,7 @@ class ChatRequest(BaseModel):
     presence_penalty: Optional[float] = Field(
         None, ge=-2.0, le=2.0, description="Presence penalty"
     )
-    stop: Optional[Union[str, List[str]]] = Field(None, description="Stop sequences")
+    stop: Optional[Union[str, list[str]]] = Field(None, description="Stop sequences")
     stream: bool = Field(False, description="Enable streaming response")
     user: Optional[str] = Field(None, description="User ID for tracking")
     timeout: Optional[float] = Field(
@@ -60,8 +60,8 @@ class ChatRequest(BaseModel):
     @field_validator("stop")
     @classmethod
     def validate_stop(
-        cls, v: Optional[Union[str, List[str]]]
-    ) -> Optional[Union[str, List[str]]]:
+        cls, v: Optional[Union[str, list[str]]]
+    ) -> Optional[Union[str, list[str]]]:
         if isinstance(v, list) and len(v) > 4:
             raise ValueError("Maximum 4 stop sequences allowed")
         return v
@@ -86,7 +86,7 @@ class ChatResponse(BaseModel):
     created: datetime = Field(
         default_factory=datetime.now, description="Response creation time"
     )
-    metadata: Dict[str, Any] = Field(
+    metadata: dict[str, Any] = Field(
         default_factory=dict, description="Additional metadata"
     )
 
@@ -103,7 +103,7 @@ class StreamingChunk(BaseModel):
     created: datetime = Field(
         default_factory=datetime.now, description="Chunk creation time"
     )
-    metadata: Dict[str, Any] = Field(
+    metadata: dict[str, Any] = Field(
         default_factory=dict, description="Additional metadata"
     )
 
@@ -120,7 +120,7 @@ class ProviderConfig(BaseModel):
     rate_limit: Optional[int] = Field(
         None, gt=0, description="Rate limit (requests per minute)"
     )
-    metadata: Dict[str, Any] = Field(
+    metadata: dict[str, Any] = Field(
         default_factory=dict, description="Additional configuration"
     )
 

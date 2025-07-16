@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Dict, Type
+from typing import Any
 
 from .core.base import BaseProvider
 from .core.exceptions import ValidationError
@@ -15,14 +15,14 @@ from .providers.openai import OpenAIProvider
 class LLMFactory:
     """Factory for creating LLM providers."""
 
-    _providers: Dict[str, Type[BaseProvider]] = {
+    _providers: dict[str, type[BaseProvider]] = {
         "openai": OpenAIProvider,
         "google": GoogleProvider,
         "claude": ClaudeProvider,
     }
 
     @classmethod
-    def create(cls, provider: str, **kwargs) -> BaseProvider:
+    def create(cls, provider: str, **kwargs: Any) -> BaseProvider:
         """Create a provider instance.
 
         Args:
@@ -48,7 +48,7 @@ class LLMFactory:
         return provider_class(config)
 
     @classmethod
-    def list_providers(cls) -> Dict[str, Type[BaseProvider]]:
+    def list_providers(cls) -> dict[str, type[BaseProvider]]:
         """List available providers.
 
         Returns:
@@ -57,7 +57,7 @@ class LLMFactory:
         return cls._providers.copy()
 
     @classmethod
-    def register_provider(cls, name: str, provider_class: Type[BaseProvider]) -> None:
+    def register_provider(cls, name: str, provider_class: type[BaseProvider]) -> None:
         """Register a new provider.
 
         Args:
