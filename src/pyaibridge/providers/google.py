@@ -163,7 +163,7 @@ class GoogleProvider(BaseProvider):
 
         if self._client is None:
             await self.connect()
-        
+
         assert self._client is not None
 
         payload = self._build_payload(request)
@@ -217,7 +217,7 @@ class GoogleProvider(BaseProvider):
 
         if self._client is None:
             await self.connect()
-        
+
         assert self._client is not None
 
         payload = self._build_payload(request)

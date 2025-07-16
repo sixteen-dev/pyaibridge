@@ -273,7 +273,7 @@ class XAIProvider(BaseProvider):
         """
         if not self._client:
             await self.connect()
-        
+
         assert self._client is not None
 
         if not await self.validate_model(request.model):
@@ -370,7 +370,7 @@ class XAIProvider(BaseProvider):
         """
         if not self._client:
             await self.connect()
-        
+
         assert self._client is not None
 
         if not await self.validate_model(request.model):
