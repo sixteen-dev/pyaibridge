@@ -231,3 +231,6 @@ pyvenv.cfg
 
 # claude
 .claude/
+
+# Development testing directory
+dev/
