@@ -84,9 +84,9 @@ class TestClaudeProvider:
         models = claude_provider.supported_models
         
         # Check Claude 4 series
-        assert "claude-4-opus" in models
-        assert "claude-4-sonnet" in models
-        assert "claude-4-haiku" in models
+        assert "claude-opus-4-20250514" in models
+        assert "claude-sonnet-4-20250514" in models
+        assert "claude-3-5-haiku-20241022" in models  # Use 3.5 haiku instead of removed 4-haiku
         
         # Check Claude 3.5 series
         assert "claude-3-5-sonnet-20241022" in models
@@ -98,18 +98,18 @@ class TestClaudeProvider:
         assert "claude-3-haiku-20240307" in models
         
         # Verify model configurations
-        claude_4_opus = models["claude-4-opus"]
-        assert claude_4_opus["context_length"] == 200000
-        assert claude_4_opus["supports_streaming"] is True
-        assert "pricing" in claude_4_opus
-        assert "prompt_per_token" in claude_4_opus["pricing"]
-        assert "completion_per_token" in claude_4_opus["pricing"]
+        claude_opus_4 = models["claude-opus-4-20250514"]
+        assert claude_opus_4["context_length"] == 200000
+        assert claude_opus_4["supports_streaming"] is True
+        assert "pricing" in claude_opus_4
+        assert "prompt_per_token" in claude_opus_4["pricing"]
+        assert "completion_per_token" in claude_opus_4["pricing"]
 
     async def test_validate_model(self, claude_provider):
         """Test model validation."""
         # Valid models
         assert await claude_provider.validate_model("claude-3-5-sonnet-20241022") is True
-        assert await claude_provider.validate_model("claude-4-opus") is True
+        assert await claude_provider.validate_model("claude-opus-4-20250514") is True
         
         # Invalid model
         assert await claude_provider.validate_model("invalid-model") is False
@@ -374,7 +374,7 @@ class TestClaudeProvider:
         assert claude_provider._client is None
 
     @pytest.mark.parametrize("model,expected_cost", [
-        ("claude-4-opus", (15.00 / 1000000) * 100 + (75.00 / 1000000) * 50),
+        ("claude-opus-4-20250514", (15.00 / 1000000) * 100 + (75.00 / 1000000) * 50),
         ("claude-3-5-sonnet-20241022", (3.00 / 1000000) * 100 + (15.00 / 1000000) * 50),
         ("claude-3-haiku-20240307", (0.25 / 1000000) * 100 + (1.25 / 1000000) * 50),
     ])

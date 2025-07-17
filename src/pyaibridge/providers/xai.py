@@ -35,106 +35,94 @@ class XAIProvider(BaseProvider):
 
     BASE_URL = "https://api.x.ai/v1"
 
-    # Model configurations with pricing (per 1M tokens)
+    # Model configurations with pricing (per 1M tokens) - Updated from xAI docs
     SUPPORTED_MODELS = {
-        # Grok 4 Series (Latest 2025)
-        "grok-4": {
-            "context_length": 131072,
+        # Grok 4 Series (Latest reasoning model)
+        "grok-4-0709": {
+            "context_length": 256000,
             "supports_streaming": True,
             "supports_vision": False,
             "supports_tool_use": True,
             "supports_search": True,
-            "knowledge_cutoff": "October 2024",
-            "pricing": {
-                "prompt_per_token": 2.00 / 1000000,
-                "completion_per_token": 10.00 / 1000000,
-            },
-        },
-        "grok-4-heavy": {
-            "context_length": 131072,
-            "supports_streaming": True,
-            "supports_vision": False,
-            "supports_tool_use": True,
-            "supports_search": True,
-            "knowledge_cutoff": "October 2024",
+            "knowledge_cutoff": "November 2024",
             "pricing": {
                 "prompt_per_token": 3.00 / 1000000,
                 "completion_per_token": 15.00 / 1000000,
             },
         },
-        # Grok 3 Series
-        "grok-3-beta": {
+        # Grok 3 Series (Current stable models)
+        "grok-3": {
             "context_length": 131072,
             "supports_streaming": True,
             "supports_vision": False,
             "supports_tool_use": True,
             "supports_search": True,
-            "knowledge_cutoff": "October 2024",
+            "knowledge_cutoff": "November 2024",
             "pricing": {
-                "prompt_per_token": 2.00 / 1000000,
-                "completion_per_token": 10.00 / 1000000,
+                "prompt_per_token": 3.00 / 1000000,
+                "completion_per_token": 15.00 / 1000000,
             },
         },
-        "grok-3-fast-beta": {
+        "grok-3-mini": {
             "context_length": 131072,
             "supports_streaming": True,
             "supports_vision": False,
             "supports_tool_use": True,
             "supports_search": True,
-            "knowledge_cutoff": "October 2024",
+            "knowledge_cutoff": "November 2024",
             "pricing": {
-                "prompt_per_token": 1.00 / 1000000,
-                "completion_per_token": 5.00 / 1000000,
+                "prompt_per_token": 0.30 / 1000000,
+                "completion_per_token": 0.50 / 1000000,
             },
         },
-        # Grok 2 Series
-        "grok-2-1212": {
+        "grok-3-fast": {
             "context_length": 131072,
             "supports_streaming": True,
             "supports_vision": False,
             "supports_tool_use": True,
             "supports_search": True,
-            "knowledge_cutoff": "December 2024",
+            "knowledge_cutoff": "November 2024",
             "pricing": {
-                "prompt_per_token": 2.00 / 1000000,
-                "completion_per_token": 10.00 / 1000000,
+                "prompt_per_token": 5.00 / 1000000,
+                "completion_per_token": 25.00 / 1000000,
             },
         },
+        "grok-3-mini-fast": {
+            "context_length": 131072,
+            "supports_streaming": True,
+            "supports_vision": False,
+            "supports_tool_use": True,
+            "supports_search": True,
+            "knowledge_cutoff": "November 2024",
+            "pricing": {
+                "prompt_per_token": 0.60 / 1000000,
+                "completion_per_token": 4.00 / 1000000,
+            },
+        },
+        # Grok 2 Vision Models
         "grok-2-vision-1212": {
             "context_length": 32768,
             "supports_streaming": True,
             "supports_vision": True,
             "supports_tool_use": True,
             "supports_search": True,
-            "knowledge_cutoff": "December 2024",
+            "knowledge_cutoff": "November 2024",
             "pricing": {
                 "prompt_per_token": 2.00 / 1000000,
                 "completion_per_token": 10.00 / 1000000,
             },
         },
-        # Legacy Beta Models
-        "grok-beta": {
-            "context_length": 131072,
-            "supports_streaming": True,
+        # Image Generation Model
+        "grok-2-image-1212": {
+            "context_length": 32768,
+            "supports_streaming": False,
             "supports_vision": False,
-            "supports_tool_use": True,
-            "supports_search": True,
-            "knowledge_cutoff": "October 2024",
+            "supports_tool_use": False,
+            "supports_search": False,
+            "supports_image_generation": True,
+            "knowledge_cutoff": "November 2024",
             "pricing": {
-                "prompt_per_token": 5.00 / 1000000,  # Higher legacy pricing
-                "completion_per_token": 15.00 / 1000000,
-            },
-        },
-        "grok-vision-beta": {
-            "context_length": 8192,
-            "supports_streaming": True,
-            "supports_vision": True,
-            "supports_tool_use": True,
-            "supports_search": True,
-            "knowledge_cutoff": "October 2024",
-            "pricing": {
-                "prompt_per_token": 5.00 / 1000000,  # Higher legacy pricing
-                "completion_per_token": 15.00 / 1000000,
+                "per_image": 0.07,  # $0.07 per image
             },
         },
     }

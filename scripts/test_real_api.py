@@ -106,9 +106,9 @@ async def main():
     # Test configurations
     tests = [
         (OpenAIProvider, "OPENAI_API_KEY", "OpenAI", "gpt-4o-mini"),
-        (GoogleProvider, "GOOGLE_API_KEY", "Google", "gemini-1.5-flash"),
+        (GoogleProvider, "GOOGLE_API_KEY", "Google", "gemini-2.5-flash"),
         (ClaudeProvider, "CLAUDE_API_KEY", "Claude", "claude-3-haiku-20240307"),
-        (XAIProvider, "XAI_API_KEY", "xAI", "grok-beta")
+        (XAIProvider, "XAI_API_KEY", "xAI", "grok-3-mini")
     ]
     
     results = []

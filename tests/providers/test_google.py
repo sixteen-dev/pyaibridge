@@ -35,7 +35,7 @@ class TestGoogleProvider:
         """Test supported models."""
         models = provider.supported_models
         assert "gemini-2.5-flash" in models
-        assert "gemini-2.5-flash-8b" in models
+        assert "gemini-2.5-flash-lite-preview-06-17" in models
         assert "gemini-2.5-pro" in models
         assert "gemini-2.0-flash" in models
         assert "gemini-1.5-pro" in models
@@ -56,7 +56,7 @@ class TestGoogleProvider:
     def test_get_model_info(self, provider):
         """Test getting model info."""
         info = provider.get_model_info("gemini-2.5-flash")
-        assert info["context_length"] == 1000000
+        assert info["context_length"] == 1048576  # Updated to correct value: 1M tokens
         assert info["supports_streaming"] is True
         
         with pytest.raises(ValueError):

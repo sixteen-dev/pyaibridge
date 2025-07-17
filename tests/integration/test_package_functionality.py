@@ -102,7 +102,7 @@ class TestProviderInitialization:
         assert provider.provider_name == "claude"
         assert provider.config.api_key == "test-key-123"
         assert len(provider.supported_models) > 0
-        assert "claude-4-opus" in provider.supported_models
+        assert "claude-opus-4-20250514" in provider.supported_models
     
     def test_xai_provider_init(self):
         """Test xAI provider initialization.""" 
@@ -115,7 +115,7 @@ class TestProviderInitialization:
         assert provider.provider_name == "xai"
         assert provider.config.api_key == "test-key-123"
         assert len(provider.supported_models) > 0
-        assert "grok-4" in provider.supported_models
+        assert "grok-4-0709" in provider.supported_models
 
 
 class TestModelValidation:
@@ -208,17 +208,17 @@ class TestCostCalculation:
         
         # Test Google
         google_provider = GoogleProvider(config)
-        cost = google_provider.calculate_cost(test_usage, "gemini-2.5-flash")
+        cost = google_provider.calculate_cost(test_usage, "gemini-2.5-flash-lite-preview-06-17")
         assert cost > 0, "Google cost should be positive"
         
         # Test Claude
         claude_provider = ClaudeProvider(config)
-        cost = claude_provider.calculate_cost(test_usage, "claude-4-sonnet")
+        cost = claude_provider.calculate_cost(test_usage, "claude-sonnet-4-20250514")
         assert cost > 0, "Claude cost should be positive"
         
         # Test xAI
         xai_provider = XAIProvider(config)
-        cost = xai_provider.calculate_cost(test_usage, "grok-4")
+        cost = xai_provider.calculate_cost(test_usage, "grok-3-mini")
         assert cost > 0, "xAI cost should be positive"
 
 
