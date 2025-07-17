@@ -10,6 +10,7 @@ from .core.models import ProviderConfig
 from .providers.claude import ClaudeProvider
 from .providers.google import GoogleProvider
 from .providers.openai import OpenAIProvider
+from .providers.xai import XAIProvider
 
 
 class LLMFactory:
@@ -19,6 +20,7 @@ class LLMFactory:
         "openai": OpenAIProvider,
         "google": GoogleProvider,
         "claude": ClaudeProvider,
+        "xai": XAIProvider,
     }
 
     @classmethod

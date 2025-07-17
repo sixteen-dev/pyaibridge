@@ -2,7 +2,7 @@
 pyaibridge - High-performance unified API for all LLM providers
 """
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 __author__ = "Sujeeth Shetty"
 __email__ = "sujeeth.data@gmail.com"
 
@@ -25,7 +25,7 @@ from .core.models import (
     Usage,
 )
 from .factory import LLMFactory
-from .providers import ClaudeProvider, GoogleProvider, OpenAIProvider
+from .providers import ClaudeProvider, GoogleProvider, OpenAIProvider, XAIProvider
 from .utils.metrics import MetricsCollector, metrics
 
 __all__ = [
@@ -44,6 +44,7 @@ __all__ = [
     "ClaudeProvider",
     "GoogleProvider",
     "OpenAIProvider",
+    "XAIProvider",
     # Exceptions
     "PyAIBridgeError",
     "ProviderError",
