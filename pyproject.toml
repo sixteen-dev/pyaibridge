@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pyaibridge"
-version = "0.1.2"
+version = "0.1.3"
 description = "High-performance unified API for all LLM providers"
 readme = "README.md"
 authors = [{name = "Sixteen Dev", email = "sujeeth.data@gmail.com"}]
@@ -64,7 +64,7 @@ target-version = ['py39']
 
 [tool.ruff]
 line-length = 88
-target-version = "py39"
+target-version = "0.1.3"
 
 [tool.ruff.lint]
 select = [
@@ -91,7 +91,7 @@ ignore = [
 asyncio_mode = "auto"
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "0.1.3"
 check_untyped_defs = true
 disallow_any_generics = true
 disallow_untyped_defs = true
