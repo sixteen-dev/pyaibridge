@@ -278,7 +278,7 @@ class XAIProvider(BaseProvider):
 
             # Extract response data
             choice = data["choices"][0]
-            content = choice["message"]["content"]
+            content = choice["message"]["content"] or ""
             finish_reason = choice.get("finish_reason")
 
             # Extract usage information
@@ -426,7 +426,10 @@ class XAIProvider(BaseProvider):
 
         try:
             error_data = error.response.json()
-            error_detail = error_data.get("error", {}).get("message", str(error))
+            if isinstance(error_data, dict):
+                error_detail = error_data.get("error", {}).get("message", str(error))
+            else:
+                error_detail = str(error_data)
         except (ValueError, KeyError):
             error_detail = str(error)
 

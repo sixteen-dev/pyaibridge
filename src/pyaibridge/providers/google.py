@@ -374,6 +374,8 @@ class GoogleProvider(BaseProvider):
             if "text" in part:
                 content += part["text"]
 
+        finish_reason = candidate.get("finishReason")
+
         # Extract usage information if available
         usage_data = data.get("usageMetadata", {})
         usage = Usage(
@@ -386,7 +388,7 @@ class GoogleProvider(BaseProvider):
             id=str(uuid.uuid4()),  # Google doesn't provide IDs, so we generate one
             model=model,
             content=content,
-            finish_reason=candidate.get("finishReason"),
+            finish_reason=finish_reason,
             usage=usage,
             created=datetime.now(),
             metadata={"provider": "google", "raw_response": data},
@@ -409,14 +411,16 @@ class GoogleProvider(BaseProvider):
             if "text" in part:
                 content += part["text"]
 
-        if not content and not candidate.get("finishReason"):
+        finish_reason = candidate.get("finishReason")
+
+        if not content and not finish_reason:
             return None
 
         return StreamingChunk(
             id=str(uuid.uuid4()),  # Google doesn't provide IDs, so we generate one
             model=model,
             content=content,
-            finish_reason=candidate.get("finishReason"),
+            finish_reason=finish_reason,
             created=datetime.now(),
             metadata={"provider": "google", "raw_chunk": data},
         )

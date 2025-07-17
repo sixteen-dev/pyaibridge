@@ -87,6 +87,28 @@ def update_pyproject_toml(new_version: str) -> None:
     else:
         print("⚠️  No version found in pyproject.toml or using dynamic versioning")
 
+def update_test_file(new_version: str) -> None:
+    """Update version in test file"""
+    test_file = Path("tests/integration/test_package_functionality.py")
+    if not test_file.exists():
+        print("⚠️  Test file not found, skipping")
+        return
+    
+    content = test_file.read_text()
+    
+    # Update the version assertion in the test
+    new_content = re.sub(
+        r'(assert pyaibridge\.__version__ == ["\'])[^"\']+(["\'])',
+        f'\\g<1>{new_version}\\g<2>',
+        content
+    )
+    
+    if content != new_content:
+        test_file.write_text(new_content)
+        print(f"✅ Updated test file: {new_version}")
+    else:
+        print("⚠️  No version assertion found in test file")
+
 def main():
     parser = argparse.ArgumentParser(description="Bump version for pyaibridge")
     parser.add_argument(
@@ -126,6 +148,7 @@ def main():
         # Update files
         update_init_file(new_version)
         update_pyproject_toml(new_version)
+        update_test_file(new_version)
         
         print(f"🎉 Version successfully bumped to {new_version}")
         print("\n📝 Next steps:")

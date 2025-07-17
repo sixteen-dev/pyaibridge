@@ -19,7 +19,7 @@ class TestPackageImports:
         """Test main package can be imported."""
         import pyaibridge
         assert hasattr(pyaibridge, '__version__')
-        assert pyaibridge.__version__ == "0.2.1"
+        assert pyaibridge.__version__ == "0.2.2"
     
     def test_provider_imports(self):
         """Test all providers can be imported."""
