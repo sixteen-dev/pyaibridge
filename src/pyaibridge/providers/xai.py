@@ -99,32 +99,6 @@ class XAIProvider(BaseProvider):
                 "completion_per_token": 4.00 / 1000000,
             },
         },
-        # Grok 2 Vision Models
-        "grok-2-vision-1212": {
-            "context_length": 32768,
-            "supports_streaming": True,
-            "supports_vision": True,
-            "supports_tool_use": True,
-            "supports_search": True,
-            "knowledge_cutoff": "November 2024",
-            "pricing": {
-                "prompt_per_token": 2.00 / 1000000,
-                "completion_per_token": 10.00 / 1000000,
-            },
-        },
-        # Image Generation Model
-        "grok-2-image-1212": {
-            "context_length": 32768,
-            "supports_streaming": False,
-            "supports_vision": False,
-            "supports_tool_use": False,
-            "supports_search": False,
-            "supports_image_generation": True,
-            "knowledge_cutoff": "November 2024",
-            "pricing": {
-                "per_image": 0.07,  # $0.07 per image
-            },
-        },
     }
 
     def __init__(self, config: ProviderConfig) -> None:

@@ -43,7 +43,6 @@ class GoogleProvider(BaseProvider):
             "context_length": 1048576,  # 1M tokens
             "max_output": 65536,  # 64K tokens
             "supports_streaming": True,
-            "supports_multimodal": True,  # Audio, images, video, text, PDF
             "supports_thinking": True,
             "supports_function_calling": True,
             "supports_code_execution": True,
@@ -58,7 +57,6 @@ class GoogleProvider(BaseProvider):
             "context_length": 1048576,  # 1M tokens
             "max_output": 65536,  # 64K tokens
             "supports_streaming": True,
-            "supports_multimodal": True,  # Audio, images, video, text
             "supports_thinking": True,
             "supports_function_calling": True,
             "supports_code_execution": True,
@@ -73,7 +71,6 @@ class GoogleProvider(BaseProvider):
             "context_length": 1000000,  # 1M tokens
             "max_output": 64000,  # 64K tokens
             "supports_streaming": True,
-            "supports_multimodal": True,  # Text, images, video, audio
             "supports_thinking": True,
             "supports_function_calling": True,
             "supports_code_execution": True,
@@ -88,7 +85,6 @@ class GoogleProvider(BaseProvider):
             "context_length": 1048576,  # 1M tokens
             "max_output": 8192,  # 8K tokens
             "supports_streaming": True,
-            "supports_multimodal": True,  # Audio, images, video, text
             "supports_function_calling": True,
             "supports_code_execution": True,
             "supports_search": True,
@@ -103,7 +99,6 @@ class GoogleProvider(BaseProvider):
             "context_length": 1048576,  # 1M tokens
             "max_output": 8192,  # 8K tokens
             "supports_streaming": True,
-            "supports_multimodal": True,  # Audio, images, video, text
             "supports_function_calling": True,
             "knowledge_cutoff": "August 2024",
             "pricing": {
@@ -111,24 +106,11 @@ class GoogleProvider(BaseProvider):
                 "completion_per_token": 0.15 / 1000000,
             },
         },
-        "gemini-2.0-flash-preview-image-generation": {
-            "context_length": 32000,  # 32K tokens
-            "max_output": 8192,  # 8K tokens
-            "supports_streaming": True,
-            "supports_multimodal": True,  # Audio, images, video, text
-            "supports_image_generation": True,
-            "knowledge_cutoff": "August 2024",
-            "pricing": {
-                "prompt_per_token": 0.075 / 1000000,
-                "completion_per_token": 0.30 / 1000000,
-            },
-        },
         # Gemini 1.5 Series (Legacy but Stable)
         "gemini-1.5-pro": {
             "context_length": 2097152,  # 2M tokens
             "max_output": 8192,  # 8K tokens
             "supports_streaming": True,
-            "supports_multimodal": True,  # Audio, images, video, text
             "supports_function_calling": True,
             "supports_code_execution": True,
             "deprecation_date": "September 2025",
@@ -141,7 +123,6 @@ class GoogleProvider(BaseProvider):
             "context_length": 1048576,  # 1M tokens
             "max_output": 8192,  # 8K tokens
             "supports_streaming": True,
-            "supports_multimodal": True,  # Audio, images, video, text
             "supports_function_calling": True,
             "supports_code_execution": True,
             "deprecation_date": "September 2025",
@@ -154,7 +135,6 @@ class GoogleProvider(BaseProvider):
             "context_length": 1048576,  # 1M tokens
             "max_output": 8192,  # 8K tokens
             "supports_streaming": True,
-            "supports_multimodal": True,  # Audio, images, video, text
             "supports_function_calling": True,
             "supports_code_execution": True,
             "deprecation_date": "September 2025",

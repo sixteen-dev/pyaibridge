@@ -41,9 +41,6 @@ class TestXAIProvider:
         assert "grok-3-mini" in models
         assert "grok-3-fast" in models
         assert "grok-3-mini-fast" in models
-        # Grok 2 series
-        assert "grok-2-vision-1212" in models
-        assert "grok-2-image-1212" in models
         
         # Check model capabilities
         grok4_info = models["grok-4-0709"]
@@ -51,10 +48,6 @@ class TestXAIProvider:
         assert grok4_info["supports_tool_use"] is True
         assert grok4_info["supports_search"] is True
         assert grok4_info["context_length"] == 256000
-        
-        # Check vision model
-        vision_info = models["grok-2-vision-1212"]
-        assert vision_info["supports_vision"] is True
     
     async def test_validate_model(self, provider):
         """Test model validation."""
@@ -224,8 +217,6 @@ class TestXAIProvider:
         assert grok4_info["supports_search"] is True
         assert grok4_info["context_length"] == 256000
         
-        vision_info = provider.get_model_info("grok-2-vision-1212")
-        assert vision_info["supports_vision"] is True
         
         with pytest.raises(ValueError, match="Model 'invalid' is not supported by xai"):
             provider.get_model_info("invalid")

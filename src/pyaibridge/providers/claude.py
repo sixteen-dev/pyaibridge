@@ -44,7 +44,6 @@ class ClaudeProvider(BaseProvider):
             "context_length": 200000,
             "max_output": 32000,
             "supports_streaming": True,
-            "supports_vision": True,
             "supports_extended_thinking": True,
             "knowledge_cutoff": "March 2025",
             "pricing": {
@@ -56,7 +55,6 @@ class ClaudeProvider(BaseProvider):
             "context_length": 200000,
             "max_output": 64000,
             "supports_streaming": True,
-            "supports_vision": True,
             "supports_extended_thinking": True,
             "knowledge_cutoff": "March 2025",
             "pricing": {
@@ -69,7 +67,6 @@ class ClaudeProvider(BaseProvider):
             "context_length": 200000,
             "max_output": 64000,
             "supports_streaming": True,
-            "supports_vision": True,
             "supports_extended_thinking": True,
             "knowledge_cutoff": "November 2024",
             "pricing": {
@@ -82,7 +79,6 @@ class ClaudeProvider(BaseProvider):
             "context_length": 200000,
             "max_output": 8192,
             "supports_streaming": True,
-            "supports_vision": True,
             "supports_extended_thinking": False,
             "knowledge_cutoff": "April 2024",
             "pricing": {
@@ -94,7 +90,6 @@ class ClaudeProvider(BaseProvider):
             "context_length": 200000,
             "max_output": 8192,
             "supports_streaming": True,
-            "supports_vision": True,
             "supports_extended_thinking": False,
             "knowledge_cutoff": "April 2024",
             "pricing": {
@@ -106,7 +101,6 @@ class ClaudeProvider(BaseProvider):
             "context_length": 200000,
             "max_output": 8192,
             "supports_streaming": True,
-            "supports_vision": True,
             "supports_extended_thinking": False,
             "knowledge_cutoff": "July 2024",
             "pricing": {
@@ -119,7 +113,6 @@ class ClaudeProvider(BaseProvider):
             "context_length": 200000,
             "max_output": 4096,
             "supports_streaming": True,
-            "supports_vision": True,
             "supports_extended_thinking": False,
             "knowledge_cutoff": "August 2023",
             "pricing": {
@@ -131,7 +124,6 @@ class ClaudeProvider(BaseProvider):
             "context_length": 200000,
             "max_output": 4096,
             "supports_streaming": True,
-            "supports_vision": True,
             "supports_extended_thinking": False,
             "knowledge_cutoff": "August 2023",
             "pricing": {
@@ -143,7 +135,6 @@ class ClaudeProvider(BaseProvider):
             "context_length": 200000,
             "max_output": 4096,
             "supports_streaming": True,
-            "supports_vision": True,
             "supports_extended_thinking": False,
             "knowledge_cutoff": "August 2023",
             "pricing": {
