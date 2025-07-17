@@ -53,8 +53,7 @@ jobs:
 
   deploy-test-pypi:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/test-pypi' && (needs.test.result == 'success' || needs.test.result == 'skipped')
-    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/test-pypi'
     environment: test-pypi
     permissions:
       id-token: write
@@ -82,8 +81,7 @@ jobs:
 
   deploy-production:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && (needs.test.result == 'success' || needs.test.result == 'skipped')
-    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     environment: pypi
     permissions:
       id-token: write
