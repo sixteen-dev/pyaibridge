@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pyaibridge"
-version = "0.2.0"
+version = "0.2.1"
 description = "High-performance unified API for all LLM providers"
 readme = "README.md"
 authors = [{name = "Sixteen Dev", email = "sujeeth.data@gmail.com"}]
