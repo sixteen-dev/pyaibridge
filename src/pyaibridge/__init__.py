@@ -2,7 +2,7 @@
 pyaibridge - High-performance unified API for all LLM providers
 """
 
-__version__ = "0.1.2"
+__version__ = "0.1.3"
 __author__ = "Sujeeth Shetty"
 __email__ = "sujeeth.data@gmail.com"
 
