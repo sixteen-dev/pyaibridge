@@ -36,59 +36,108 @@ class GoogleProvider(BaseProvider):
 
     BASE_URL = "https://generativelanguage.googleapis.com/v1beta"
 
-    # Model configurations with pricing (per 1M tokens)
+    # Model configurations with pricing and capabilities - Updated from Google docs
     SUPPORTED_MODELS = {
-        "gemini-2.5-flash": {
-            "context_length": 1000000,
-            "supports_streaming": True,
-            "pricing": {
-                "prompt_per_token": 0.075 / 1000000,
-                "completion_per_token": 0.30 / 1000000,
-            },
-        },
-        "gemini-2.5-flash-8b": {
-            "context_length": 1000000,
-            "supports_streaming": True,
-            "pricing": {
-                "prompt_per_token": 0.0375 / 1000000,
-                "completion_per_token": 0.15 / 1000000,
-            },
-        },
+        # Gemini 2.5 Series (Latest 2025)
         "gemini-2.5-pro": {
-            "context_length": 2000000,
+            "context_length": 1048576,  # 1M tokens
+            "max_output": 65536,  # 64K tokens
             "supports_streaming": True,
+            "supports_thinking": True,
+            "supports_function_calling": True,
+            "supports_code_execution": True,
+            "supports_search_grounding": True,
+            "knowledge_cutoff": "January 2025",
             "pricing": {
                 "prompt_per_token": 1.25 / 1000000,
                 "completion_per_token": 5.0 / 1000000,
             },
         },
-        "gemini-2.0-flash": {
-            "context_length": 1000000,
+        "gemini-2.5-flash": {
+            "context_length": 1048576,  # 1M tokens
+            "max_output": 65536,  # 64K tokens
             "supports_streaming": True,
+            "supports_thinking": True,
+            "supports_function_calling": True,
+            "supports_code_execution": True,
+            "supports_search_grounding": True,
+            "knowledge_cutoff": "January 2025",
             "pricing": {
                 "prompt_per_token": 0.075 / 1000000,
                 "completion_per_token": 0.30 / 1000000,
             },
         },
-        "gemini-1.5-pro": {
-            "context_length": 2000000,
+        "gemini-2.5-flash-lite-preview-06-17": {
+            "context_length": 1000000,  # 1M tokens
+            "max_output": 64000,  # 64K tokens
             "supports_streaming": True,
+            "supports_thinking": True,
+            "supports_function_calling": True,
+            "supports_code_execution": True,
+            "knowledge_cutoff": "January 2025",
+            "pricing": {
+                "prompt_per_token": 0.0375 / 1000000,  # Most cost-efficient
+                "completion_per_token": 0.15 / 1000000,
+            },
+        },
+        # Gemini 2.0 Series
+        "gemini-2.0-flash": {
+            "context_length": 1048576,  # 1M tokens
+            "max_output": 8192,  # 8K tokens
+            "supports_streaming": True,
+            "supports_function_calling": True,
+            "supports_code_execution": True,
+            "supports_search": True,
+            "supports_live_api": True,
+            "knowledge_cutoff": "August 2024",
+            "pricing": {
+                "prompt_per_token": 0.075 / 1000000,
+                "completion_per_token": 0.30 / 1000000,
+            },
+        },
+        "gemini-2.0-flash-lite": {
+            "context_length": 1048576,  # 1M tokens
+            "max_output": 8192,  # 8K tokens
+            "supports_streaming": True,
+            "supports_function_calling": True,
+            "knowledge_cutoff": "August 2024",
+            "pricing": {
+                "prompt_per_token": 0.0375 / 1000000,  # Cost-efficient
+                "completion_per_token": 0.15 / 1000000,
+            },
+        },
+        # Gemini 1.5 Series (Legacy but Stable)
+        "gemini-1.5-pro": {
+            "context_length": 2097152,  # 2M tokens
+            "max_output": 8192,  # 8K tokens
+            "supports_streaming": True,
+            "supports_function_calling": True,
+            "supports_code_execution": True,
+            "deprecation_date": "September 2025",
             "pricing": {
                 "prompt_per_token": 1.25 / 1000000,
                 "completion_per_token": 5.0 / 1000000,
             },
         },
         "gemini-1.5-flash": {
-            "context_length": 1000000,
+            "context_length": 1048576,  # 1M tokens
+            "max_output": 8192,  # 8K tokens
             "supports_streaming": True,
+            "supports_function_calling": True,
+            "supports_code_execution": True,
+            "deprecation_date": "September 2025",
             "pricing": {
                 "prompt_per_token": 0.075 / 1000000,
                 "completion_per_token": 0.30 / 1000000,
             },
         },
         "gemini-1.5-flash-8b": {
-            "context_length": 1000000,
+            "context_length": 1048576,  # 1M tokens
+            "max_output": 8192,  # 8K tokens
             "supports_streaming": True,
+            "supports_function_calling": True,
+            "supports_code_execution": True,
+            "deprecation_date": "September 2025",
             "pricing": {
                 "prompt_per_token": 0.0375 / 1000000,
                 "completion_per_token": 0.15 / 1000000,

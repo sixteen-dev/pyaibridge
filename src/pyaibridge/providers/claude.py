@@ -37,40 +37,60 @@ class ClaudeProvider(BaseProvider):
     BASE_URL = "https://api.anthropic.com/v1"
     API_VERSION = "2023-06-01"
 
-    # Model configurations with pricing (per 1M tokens)
+    # Model configurations with pricing (per 1M tokens) - Updated from Anthropic docs
     SUPPORTED_MODELS = {
         # Claude 4 Series (Latest 2025)
-        "claude-4-opus": {
+        "claude-opus-4-20250514": {
             "context_length": 200000,
+            "max_output": 32000,
             "supports_streaming": True,
-            "knowledge_cutoff": "April 2024",
+            "supports_extended_thinking": True,
+            "knowledge_cutoff": "March 2025",
             "pricing": {
                 "prompt_per_token": 15.00 / 1000000,
                 "completion_per_token": 75.00 / 1000000,
             },
         },
-        "claude-4-sonnet": {
+        "claude-sonnet-4-20250514": {
             "context_length": 200000,
+            "max_output": 64000,
             "supports_streaming": True,
+            "supports_extended_thinking": True,
+            "knowledge_cutoff": "March 2025",
+            "pricing": {
+                "prompt_per_token": 3.00 / 1000000,
+                "completion_per_token": 15.00 / 1000000,
+            },
+        },
+        # Claude 3.7 Series (Extended Thinking)
+        "claude-3-7-sonnet-20250219": {
+            "context_length": 200000,
+            "max_output": 64000,
+            "supports_streaming": True,
+            "supports_extended_thinking": True,
+            "knowledge_cutoff": "November 2024",
+            "pricing": {
+                "prompt_per_token": 3.00 / 1000000,
+                "completion_per_token": 15.00 / 1000000,
+            },
+        },
+        # Claude 3.5 Series (Current Production)
+        "claude-3-5-sonnet-20241022": {
+            "context_length": 200000,
+            "max_output": 8192,
+            "supports_streaming": True,
+            "supports_extended_thinking": False,
             "knowledge_cutoff": "April 2024",
             "pricing": {
                 "prompt_per_token": 3.00 / 1000000,
                 "completion_per_token": 15.00 / 1000000,
             },
         },
-        "claude-4-haiku": {
+        "claude-3-5-sonnet-20240620": {
             "context_length": 200000,
+            "max_output": 8192,
             "supports_streaming": True,
-            "knowledge_cutoff": "April 2024",
-            "pricing": {
-                "prompt_per_token": 0.25 / 1000000,
-                "completion_per_token": 1.25 / 1000000,
-            },
-        },
-        # Claude 3.5 Series (Current Production)
-        "claude-3-5-sonnet-20241022": {
-            "context_length": 200000,
-            "supports_streaming": True,
+            "supports_extended_thinking": False,
             "knowledge_cutoff": "April 2024",
             "pricing": {
                 "prompt_per_token": 3.00 / 1000000,
@@ -79,17 +99,21 @@ class ClaudeProvider(BaseProvider):
         },
         "claude-3-5-haiku-20241022": {
             "context_length": 200000,
+            "max_output": 8192,
             "supports_streaming": True,
+            "supports_extended_thinking": False,
             "knowledge_cutoff": "July 2024",
             "pricing": {
-                "prompt_per_token": 1.00 / 1000000,
-                "completion_per_token": 5.00 / 1000000,
+                "prompt_per_token": 0.80 / 1000000,
+                "completion_per_token": 4.00 / 1000000,
             },
         },
         # Claude 3 Series (Legacy but Stable)
         "claude-3-opus-20240229": {
             "context_length": 200000,
+            "max_output": 4096,
             "supports_streaming": True,
+            "supports_extended_thinking": False,
             "knowledge_cutoff": "August 2023",
             "pricing": {
                 "prompt_per_token": 15.00 / 1000000,
@@ -98,7 +122,9 @@ class ClaudeProvider(BaseProvider):
         },
         "claude-3-sonnet-20240229": {
             "context_length": 200000,
+            "max_output": 4096,
             "supports_streaming": True,
+            "supports_extended_thinking": False,
             "knowledge_cutoff": "August 2023",
             "pricing": {
                 "prompt_per_token": 3.00 / 1000000,
@@ -107,7 +133,9 @@ class ClaudeProvider(BaseProvider):
         },
         "claude-3-haiku-20240307": {
             "context_length": 200000,
+            "max_output": 4096,
             "supports_streaming": True,
+            "supports_extended_thinking": False,
             "knowledge_cutoff": "August 2023",
             "pricing": {
                 "prompt_per_token": 0.25 / 1000000,

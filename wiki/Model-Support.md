@@ -1,18 +1,18 @@
 # Model Support
 
-PyAIBridge supports the latest models from OpenAI, Google, and Anthropic. This page provides a comprehensive overview of all supported models, their capabilities, and pricing.
+PyAIBridge supports the latest models from OpenAI, Google, Anthropic, and xAI. This page provides a comprehensive overview of all supported models, their capabilities, and pricing.
 
 ## OpenAI Models
 
 ### GPT-4.1 Series (Latest 2025) ⭐
 
-| Model | Context Length | Streaming | Knowledge Cutoff | Input Cost* | Output Cost* |
-|-------|----------------|-----------|------------------|-------------|--------------|
-| `gpt-4.1` | 1M tokens | ✅ | June 2024 | $2.00 | $8.00 |
-| `gpt-4.1-mini` | 1M tokens | ✅ | June 2024 | $0.40 | $1.60 |
-| `gpt-4.1-nano` | 1M tokens | ✅ | June 2024 | $0.20 | $0.80 |
+| Model | Context Length | Streaming | Knowledge Cutoff |
+|-------|----------------|-----------|------------------|
+| `gpt-4.1` | 1M tokens | ✅ | June 2024 |
+| `gpt-4.1-mini` | 1M tokens | ✅ | June 2024 |
+| `gpt-4.1-nano` | 1M tokens | ✅ | June 2024 |
 
-*Per 1M tokens
+**📊 Pricing**: See [OpenAI Pricing](https://openai.com/api/pricing/) for current rates
 
 **Features:**
 - Ultra-large context windows (1M tokens)
@@ -21,13 +21,13 @@ PyAIBridge supports the latest models from OpenAI, Google, and Anthropic. This p
 
 ### O-Series Reasoning Models (Latest 2025) 🧠
 
-| Model | Context Length | Streaming | Knowledge Cutoff | Input Cost* | Output Cost* |
-|-------|----------------|-----------|------------------|-------------|--------------|
-| `o3` | 200K tokens | ✅ | June 2024 | $10.00 | $40.00 |
-| `o3-pro` | 200K tokens | ✅ | June 2024 | $15.00 | $60.00 |
-| `o4-mini` | 200K tokens | ✅ | June 2024 | $0.30 | $1.20 |
+| Model | Context Length | Streaming | Knowledge Cutoff |
+|-------|----------------|-----------|------------------|
+| `o3` | 200K tokens | ❌ | June 2024 |
+| `o3-pro` | 200K tokens | ❌ | June 2024 |
+| `o4-mini` | 200K tokens | ❌ | June 2024 |
 
-*Per 1M tokens
+**📊 Pricing**: See [OpenAI Pricing](https://openai.com/api/pricing/) for current rates
 
 **Features:**
 - Advanced reasoning capabilities
@@ -36,114 +36,179 @@ PyAIBridge supports the latest models from OpenAI, Google, and Anthropic. This p
 
 ### Legacy Models (Still Supported)
 
-| Model | Context Length | Streaming | Input Cost* | Output Cost* |
-|-------|----------------|-----------|-------------|--------------|
-| `gpt-4o` | 128K tokens | ✅ | $0.005 | $0.015 |
-| `gpt-4o-mini` | 128K tokens | ✅ | $0.00015 | $0.0006 |
-| `gpt-4-turbo` | 128K tokens | ✅ | $0.01 | $0.03 |
-| `gpt-3.5-turbo` | 4K tokens | ✅ | $0.0015 | $0.002 |
+| Model | Context Length | Streaming |
+|-------|----------------|-----------|
+| `gpt-4o` | 128K tokens | ✅ |
+| `gpt-4o-mini` | 128K tokens | ✅ |
+| `gpt-4-turbo` | 128K tokens | ✅ |
+| `gpt-3.5-turbo` | 4K tokens | ✅ |
 
-*Per 1M tokens
+**📊 Pricing**: See [OpenAI Pricing](https://openai.com/api/pricing/) for current rates
 
 ## Google Gemini Models
 
 ### Gemini 2.5 Series (Latest 2025) ⭐
 
-| Model | Context Length | Streaming | Input Cost* | Output Cost* |
-|-------|----------------|-----------|-------------|--------------|
-| `gemini-2.5-pro` | 2M tokens | ✅ | $1.25 | $5.00 |
-| `gemini-2.5-flash` | 1M tokens | ✅ | $0.075 | $0.30 |
-| `gemini-2.5-flash-8b` | 1M tokens | ✅ | $0.0375 | $0.15 |
+| Model | Context Length | Max Output | Thinking | Function Calling | Knowledge Cutoff |
+|-------|----------------|------------|----------|------------------|------------------|
+| `gemini-2.5-pro` | 1M tokens | 64K tokens | ✅ | ✅ | January 2025 |
+| `gemini-2.5-flash` | 1M tokens | 64K tokens | ✅ | ✅ | January 2025 |
+| `gemini-2.5-flash-lite-preview-06-17` | 1M tokens | 64K tokens | ✅ | ✅ | January 2025 |
 
-*Per 1M tokens
+**📊 Pricing**: See [Google AI Pricing](https://ai.google.dev/gemini-api/docs/pricing) for current rates
 
 **Features:**
-- Massive context windows (up to 2M tokens)
-- Ultra-fast inference
-- Competitive pricing
+- State-of-the-art thinking and reasoning capabilities
+- Massive context windows with large output tokens
+- Advanced coding and function calling
+- Most cost-efficient option available (`flash-lite-preview`)
 
 ### Gemini 2.0 Series
 
-| Model | Context Length | Streaming | Input Cost* | Output Cost* |
-|-------|----------------|-----------|-------------|--------------|
-| `gemini-2.0-flash` | 1M tokens | ✅ | $0.075 | $0.30 |
+| Model | Context Length | Max Output | Special Features | Knowledge Cutoff |
+|-------|----------------|------------|------------------|------------------|
+| `gemini-2.0-flash` | 1M tokens | 8K tokens | Live API, Real-time streaming | August 2024 |
+| `gemini-2.0-flash-lite` | 1M tokens | 8K tokens | Cost-efficient, Low latency | August 2024 |
 
-*Per 1M tokens
+**📊 Pricing**: See [Google AI Pricing](https://ai.google.dev/gemini-api/docs/pricing) for current rates
 
-### Gemini 1.5 Series (Stable)
+**Features:**
+- Next-generation features with superior speed
+- Native tool use and real-time streaming capabilities
+- Live API support for interactive applications
 
-| Model | Context Length | Streaming | Input Cost* | Output Cost* |
-|-------|----------------|-----------|-------------|--------------|
-| `gemini-1.5-pro` | 2M tokens | ✅ | $1.25 | $5.00 |
-| `gemini-1.5-flash` | 1M tokens | ✅ | $0.075 | $0.30 |
-| `gemini-1.5-flash-8b` | 1M tokens | ✅ | $0.0375 | $0.15 |
+### Gemini 1.5 Series (Legacy but Stable)
 
-*Per 1M tokens
+| Model | Context Length | Max Output | Function Calling | Deprecation Date |
+|-------|----------------|------------|------------------|------------------|
+| `gemini-1.5-pro` | 2M tokens | 8K tokens | ✅ | September 2025 |
+| `gemini-1.5-flash` | 1M tokens | 8K tokens | ✅ | September 2025 |
+| `gemini-1.5-flash-8b` | 1M tokens | 8K tokens | ✅ | September 2025 |
+
+**📊 Pricing**: See [Google AI Pricing](https://ai.google.dev/gemini-api/docs/pricing) for current rates
+
+**Features:**
+- Largest context window (2M tokens for Pro)
+- Proven stability and reliability
+- Being phased out in favor of Gemini 2.5 series
 
 ## Anthropic Claude Models
 
 ### Claude 4 Series (Latest 2025) ⭐
 
-| Model | Context Length | Streaming | Knowledge Cutoff | Input Cost* | Output Cost* |
-|-------|----------------|-----------|------------------|-------------|--------------|
-| `claude-4-opus` | 200K tokens | ✅ | April 2024 | $15.00 | $75.00 |
-| `claude-4-sonnet` | 200K tokens | ✅ | April 2024 | $3.00 | $15.00 |
-| `claude-4-haiku` | 200K tokens | ✅ | April 2024 | $0.25 | $1.25 |
+| Model | Context Length | Max Output | Streaming | Extended Thinking | Knowledge Cutoff |
+|-------|----------------|------------|-----------|------------------|------------------|
+| `claude-opus-4-20250514` | 200K tokens | 32K tokens | ✅ | ✅ | March 2025 |
+| `claude-sonnet-4-20250514` | 200K tokens | 64K tokens | ✅ | ✅ | March 2025 |
 
-*Per 1M tokens
+**📊 Pricing**: See [Anthropic Pricing](https://docs.anthropic.com/en/docs/about-claude/models/overview) for current rates
 
 **Features:**
+- Latest generation with extended thinking capabilities
 - Superior reasoning and analysis
 - High-quality code generation
-- Excellent instruction following
+- Largest output tokens in Claude family
+
+### Claude 3.7 Series (Extended Thinking) 🧠
+
+| Model | Context Length | Max Output | Streaming | Extended Thinking | Knowledge Cutoff |
+|-------|----------------|------------|-----------|------------------|------------------|
+| `claude-3-7-sonnet-20250219` | 200K tokens | 64K tokens | ✅ | ✅ | November 2024 |
+
+**📊 Pricing**: See [Anthropic Pricing](https://docs.anthropic.com/en/docs/about-claude/models/overview) for current rates
+
+**Features:**
+- Extended thinking capabilities for complex reasoning
+- Enhanced performance over Claude 3.5
 
 ### Claude 3.5 Series (Current Production)
 
-| Model | Context Length | Streaming | Knowledge Cutoff | Input Cost* | Output Cost* |
-|-------|----------------|-----------|------------------|-------------|--------------|
-| `claude-3-5-sonnet-20241022` | 200K tokens | ✅ | April 2024 | $3.00 | $15.00 |
-| `claude-3-5-haiku-20241022` | 200K tokens | ✅ | July 2024 | $1.00 | $5.00 |
+| Model | Context Length | Max Output | Streaming | Knowledge Cutoff |
+|-------|----------------|------------|-----------|------------------|
+| `claude-3-5-sonnet-20241022` | 200K tokens | 8K tokens | ✅ | April 2024 |
+| `claude-3-5-sonnet-20240620` | 200K tokens | 8K tokens | ✅ | April 2024 |
+| `claude-3-5-haiku-20241022` | 200K tokens | 8K tokens | ✅ | July 2024 |
 
-*Per 1M tokens
+**📊 Pricing**: See [Anthropic Pricing](https://docs.anthropic.com/en/docs/about-claude/models/overview) for current rates
 
 ### Claude 3 Series (Legacy but Stable)
 
-| Model | Context Length | Streaming | Knowledge Cutoff | Input Cost* | Output Cost* |
-|-------|----------------|-----------|------------------|-------------|--------------|
-| `claude-3-opus-20240229` | 200K tokens | ✅ | August 2023 | $15.00 | $75.00 |
-| `claude-3-sonnet-20240229` | 200K tokens | ✅ | August 2023 | $3.00 | $15.00 |
-| `claude-3-haiku-20240307` | 200K tokens | ✅ | August 2023 | $0.25 | $1.25 |
+| Model | Context Length | Max Output | Streaming | Knowledge Cutoff |
+|-------|----------------|------------|-----------|------------------|
+| `claude-3-opus-20240229` | 200K tokens | 4K tokens | ✅ | August 2023 |
+| `claude-3-sonnet-20240229` | 200K tokens | 4K tokens | ✅ | August 2023 |
+| `claude-3-haiku-20240307` | 200K tokens | 4K tokens | ✅ | August 2023 |
 
-*Per 1M tokens
+**📊 Pricing**: See [Anthropic Pricing](https://docs.anthropic.com/en/docs/about-claude/models/overview) for current rates
+
+## xAI Grok Models
+
+### Grok 4 Series (Latest Reasoning Models) ⭐
+
+| Model | Context Length | Streaming | Tool Use | Search | Knowledge Cutoff |
+|-------|----------------|-----------|----------|--------|------------------|
+| `grok-4-0709` | 256K tokens | ✅ | ✅ | ✅ | November 2024 |
+
+**📊 Pricing**: See [xAI Pricing](https://docs.x.ai/docs/models) for current rates
+
+**Features:**
+- Advanced reasoning capabilities (no non-reasoning mode)
+- Largest context window in Grok series (256K tokens)
+- Built-in web search capabilities
+- Function calling and tool use support
+- Note: `presencePenalty`, `frequencyPenalty`, and `stop` parameters not supported
+
+### Grok 3 Series (Current Stable Models) ⭐
+
+| Model | Context Length | Streaming | Tool Use | Search | Knowledge Cutoff |
+|-------|----------------|-----------|----------|--------|------------------|
+| `grok-3` | 131K tokens | ✅ | ✅ | ✅ | November 2024 |
+| `grok-3-mini` | 131K tokens | ✅ | ✅ | ✅ | November 2024 |
+| `grok-3-fast` | 131K tokens | ✅ | ✅ | ✅ | November 2024 |
+| `grok-3-mini-fast` | 131K tokens | ✅ | ✅ | ✅ | November 2024 |
+
+**📊 Pricing**: See [xAI Pricing](https://docs.x.ai/docs/models) for current rates
+
+**Features:**
+- Main production-ready models from xAI
+- Cost-effective options available (`grok-3-mini`)
+- Fast processing variants available
+- Full feature support including search and tools
+
+### Live Search Pricing
+
+xAI models support real-time web search with additional costs:
+- See [xAI Pricing](https://docs.x.ai/docs/models) for current search rates
+- Sources used available in `response.usage.num_sources_used`
 
 ## Model Selection Guide
 
 ### For General Use
-- **High Quality**: `gpt-4.1`, `claude-4-sonnet`, `gemini-2.5-pro`
-- **Balanced**: `gpt-4.1-mini`, `claude-4-haiku`, `gemini-2.5-flash`
-- **Cost-Effective**: `gpt-4.1-nano`, `gemini-2.5-flash-8b`
+- **High Quality**: `gpt-4.1`, `claude-opus-4-20250514`, `gemini-2.5-pro`, `grok-4-0709`
+- **Balanced**: `gpt-4.1-mini`, `claude-sonnet-4-20250514`, `gemini-2.5-flash`, `grok-3`
+- **Cost-Effective**: `gpt-4.1-nano`, `gemini-2.5-flash-lite-preview-06-17`, `grok-3-mini`, `claude-3-haiku-20240307`
 
 ### For Specific Use Cases
 
 #### 🧠 Reasoning & Analysis
-- **Best**: `o3-pro`, `claude-4-opus`
-- **Good**: `o3`, `claude-4-sonnet`
-- **Budget**: `o4-mini`, `claude-4-haiku`
+- **Best**: `o3-pro`, `claude-opus-4-20250514`, `grok-4-0709`, `claude-3-7-sonnet-20250219`
+- **Good**: `o3`, `claude-sonnet-4-20250514`, `grok-3`
+- **Budget**: `o4-mini`, `claude-3-5-haiku-20241022`, `grok-3-mini`
 
 #### 💻 Code Generation
-- **Best**: `claude-4-sonnet`, `gpt-4.1`
-- **Good**: `claude-3-5-sonnet-20241022`, `gpt-4.1-mini`
-- **Budget**: `claude-4-haiku`, `gpt-4o-mini`
+- **Best**: `claude-sonnet-4-20250514`, `gpt-4.1`, `grok-4-0709`
+- **Good**: `claude-3-5-sonnet-20241022`, `gpt-4.1-mini`, `grok-3`
+- **Budget**: `claude-3-5-haiku-20241022`, `gpt-4o-mini`, `grok-3-mini`
 
 #### 📄 Long Documents
-- **Best**: `gemini-2.5-pro` (2M context), `gpt-4.1` (1M context)
-- **Good**: `gemini-1.5-pro`, `claude-4-opus`
-- **Budget**: `gemini-2.5-flash`, `gpt-4.1-mini`
+- **Best**: `gemini-1.5-pro` (2M context), `gemini-2.5-pro` (1M context), `gpt-4.1` (1M context)
+- **Good**: `gemini-2.5-flash` (1M context), `claude-opus-4-20250514` (200K context), `grok-4-0709` (256K context)
+- **Budget**: `gemini-2.5-flash-lite-preview-06-17`, `gpt-4.1-mini`, `grok-3-mini`
 
 #### ⚡ Speed & Performance
-- **Fastest**: `gemini-2.5-flash-8b`, `gpt-4.1-nano`
-- **Fast**: `gemini-2.5-flash`, `claude-4-haiku`
-- **Balanced**: `gpt-4.1-mini`, `claude-3-5-haiku-20241022`
+- **Fastest**: `gemini-2.5-flash-lite-preview-06-17`, `gemini-2.0-flash-lite`, `gpt-4.1-nano`, `grok-3-fast`
+- **Fast**: `gemini-2.5-flash`, `gemini-2.0-flash`, `claude-3-5-haiku-20241022`, `grok-3-mini`
+- **Balanced**: `gpt-4.1-mini`, `claude-sonnet-4-20250514`, `grok-3`
 
 ## Usage Examples
 
@@ -227,8 +292,9 @@ def compare_models(text: str, providers: list):
 # Compare models for a specific task
 models_to_compare = [
     ("openai", "gpt-4.1-mini"),
-    ("google", "gemini-2.5-flash"),
-    ("claude", "claude-4-haiku")
+    ("google", "gemini-2.5-flash-lite-preview-06-17"),
+    ("claude", "claude-3-5-haiku-20241022"),
+    ("xai", "grok-3-mini")
 ]
 
 results = compare_models("Your prompt here", models_to_compare)
@@ -244,9 +310,15 @@ for result in results:
 - Streaming support varies by provider implementation
 - Knowledge cutoffs are approximate and provider-specific
 
+#### 🔍 Web Search & Real-time Data
+- **Best**: `grok-4-0709`, `grok-3`, `grok-3-fast` (built-in Live Search)
+- **Good**: `grok-3-mini`, `grok-3-mini-fast` (cost-effective with search)
+- **Note**: Other providers require external search integration
+
 ## See Also
 
 - [OpenAI Provider](OpenAI-Provider) - OpenAI-specific documentation
 - [Google Provider](Google-Provider) - Google Gemini documentation  
 - [Claude Provider](Claude-Provider) - Anthropic Claude documentation
+- [xAI Provider](XAI-Provider) - xAI Grok models documentation
 - [Cost Calculation](Cost-Calculation) - Detailed cost calculation guide

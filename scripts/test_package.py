@@ -123,9 +123,9 @@ async def test_validation():
 
     providers = [
         ("OpenAI", OpenAIProvider(config), "gpt-4.1"),
-        ("Google", GoogleProvider(config), "gemini-2.5-flash"),
-        ("Claude", ClaudeProvider(config), "claude-4-opus"),
-        ("xAI", XAIProvider(config), "grok-4")
+        ("Google", GoogleProvider(config), "gemini-2.5-flash-lite-preview-06-17"),
+        ("Claude", ClaudeProvider(config), "claude-3-5-haiku-20241022"),  # Use efficient model for testing
+        ("xAI", XAIProvider(config), "grok-3-mini")
     ]
 
     for name, provider, model in providers:
@@ -160,9 +160,9 @@ usage = {"prompt_tokens": 100, "completion_tokens": 50}
 
 providers = [
     ("OpenAI", OpenAIProvider(config), "gpt-4.1"),
-    ("Google", GoogleProvider(config), "gemini-2.5-flash"),
-    ("Claude", ClaudeProvider(config), "claude-4-sonnet"),
-    ("xAI", XAIProvider(config), "grok-4")
+    ("Google", GoogleProvider(config), "gemini-2.5-flash-lite-preview-06-17"),
+    ("Claude", ClaudeProvider(config), "claude-3-5-haiku-20241022"),  # Use efficient model for cost testing
+    ("xAI", XAIProvider(config), "grok-3-mini")
 ]
 
 for name, provider, model in providers:

@@ -72,10 +72,13 @@ def update_pyproject_toml(new_version: str) -> None:
     
     content = pyproject_file.read_text()
     
+    # Only update the version in the [project] section, not tool configurations
+    # Look for the pattern after [project] section and before any other section
     new_content = re.sub(
-        r'(version\s*=\s*["\'])[^"\']+(["\'])',
+        r'(\[project\][\s\S]*?^version\s*=\s*["\'])[^"\']+(["\'])',
         f'\\g<1>{new_version}\\g<2>',
-        content
+        content,
+        flags=re.MULTILINE
     )
     
     if content != new_content:

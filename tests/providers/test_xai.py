@@ -25,7 +25,7 @@ class TestXAIProvider:
     def chat_request(self):
         """Create basic chat request."""
         messages = [Message(role=MessageRole.USER, content="Hello")]
-        return ChatRequest(messages=messages, model="grok-3-beta")
+        return ChatRequest(messages=messages, model="grok-3-mini")
     
     def test_provider_name(self, provider):
         """Test provider name."""
@@ -35,33 +35,24 @@ class TestXAIProvider:
         """Test supported models."""
         models = provider.supported_models
         # Grok 4 series
-        assert "grok-4" in models
-        assert "grok-4-heavy" in models
+        assert "grok-4-0709" in models
         # Grok 3 series
-        assert "grok-3-beta" in models
-        assert "grok-3-fast-beta" in models
-        # Grok 2 series
-        assert "grok-2-1212" in models
-        assert "grok-2-vision-1212" in models
-        # Legacy beta models
-        assert "grok-beta" in models
-        assert "grok-vision-beta" in models
+        assert "grok-3" in models
+        assert "grok-3-mini" in models
+        assert "grok-3-fast" in models
+        assert "grok-3-mini-fast" in models
         
         # Check model capabilities
-        grok4_info = models["grok-4"]
+        grok4_info = models["grok-4-0709"]
         assert grok4_info["supports_streaming"] is True
         assert grok4_info["supports_tool_use"] is True
         assert grok4_info["supports_search"] is True
-        assert grok4_info["context_length"] == 131072
-        
-        # Check vision model
-        vision_info = models["grok-vision-beta"]
-        assert vision_info["supports_vision"] is True
+        assert grok4_info["context_length"] == 256000
     
     async def test_validate_model(self, provider):
         """Test model validation."""
-        assert await provider.validate_model("grok-3-beta") is True
-        assert await provider.validate_model("grok-4") is True
+        assert await provider.validate_model("grok-3-mini") is True
+        assert await provider.validate_model("grok-4-0709") is True
         assert await provider.validate_model("invalid-model") is False
     
     def test_convert_role(self, provider):
@@ -88,28 +79,28 @@ class TestXAIProvider:
     def test_calculate_cost(self, provider):
         """Test cost calculation."""
         usage = {"prompt_tokens": 10, "completion_tokens": 20}
-        cost = provider.calculate_cost(usage, "grok-3-beta")
+        cost = provider.calculate_cost(usage, "grok-3-mini")
         
-        # grok-3-beta pricing: $2.00 per 1M input tokens, $10.00 per 1M output tokens
-        expected_cost = (10 * 2.00 / 1000000) + (20 * 10.00 / 1000000)
+        # grok-3-mini pricing: $0.30 per 1M input tokens, $0.50 per 1M output tokens
+        expected_cost = (10 * 0.30 / 1000000) + (20 * 0.50 / 1000000)
         assert abs(cost - expected_cost) < 1e-10
     
     def test_calculate_cost_grok4(self, provider):
         """Test cost calculation for Grok 4."""
         usage = {"prompt_tokens": 15, "completion_tokens": 25}
-        cost = provider.calculate_cost(usage, "grok-4")
+        cost = provider.calculate_cost(usage, "grok-4-0709")
         
-        # grok-4 pricing: $2.00 per 1M input tokens, $10.00 per 1M output tokens
-        expected_cost = (15 * 2.00 / 1000000) + (25 * 10.00 / 1000000)
+        # grok-4-0709 pricing: $3.00 per 1M input tokens, $15.00 per 1M output tokens
+        expected_cost = (15 * 3.00 / 1000000) + (25 * 15.00 / 1000000)
         assert abs(cost - expected_cost) < 1e-10
     
-    def test_calculate_cost_legacy(self, provider):
-        """Test cost calculation for legacy model."""
+    def test_calculate_cost_grok3(self, provider):
+        """Test cost calculation for Grok 3 model."""
         usage = {"prompt_tokens": 5, "completion_tokens": 10}
-        cost = provider.calculate_cost(usage, "grok-beta")
+        cost = provider.calculate_cost(usage, "grok-3")
         
-        # grok-beta pricing: $5.00 per 1M input tokens, $15.00 per 1M output tokens
-        expected_cost = (5 * 5.00 / 1000000) + (10 * 15.00 / 1000000)
+        # grok-3 pricing: $3.00 per 1M input tokens, $15.00 per 1M output tokens
+        expected_cost = (5 * 3.00 / 1000000) + (10 * 15.00 / 1000000)
         assert abs(cost - expected_cost) < 1e-10
     
     def test_calculate_cost_invalid_model(self, provider):
@@ -125,7 +116,7 @@ class TestXAIProvider:
         # Mock the response
         mock_response = {
             "id": "chatcmpl-123",
-            "model": "grok-3-beta",
+            "model": "grok-3-mini",
             "choices": [{
                 "message": {"content": "Hello! How can I help you?"},
                 "finish_reason": "stop"
@@ -144,7 +135,7 @@ class TestXAIProvider:
         response = await provider.chat(chat_request)
         
         assert response.id == "chatcmpl-123"
-        assert response.model == "grok-3-beta"
+        assert response.model == "grok-3-mini"
         assert response.content == "Hello! How can I help you?"
         assert response.finish_reason == "stop"
         assert response.usage.prompt_tokens == 10
@@ -221,13 +212,11 @@ class TestXAIProvider:
     
     def test_model_info_access(self, provider):
         """Test accessing model information."""
-        grok4_info = provider.get_model_info("grok-4")
+        grok4_info = provider.get_model_info("grok-4-0709")
         assert grok4_info["supports_tool_use"] is True
         assert grok4_info["supports_search"] is True
-        assert grok4_info["context_length"] == 131072
+        assert grok4_info["context_length"] == 256000
         
-        vision_info = provider.get_model_info("grok-vision-beta")
-        assert vision_info["supports_vision"] is True
         
         with pytest.raises(ValueError, match="Model 'invalid' is not supported by xai"):
             provider.get_model_info("invalid")
