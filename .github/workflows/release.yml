@@ -52,9 +52,9 @@ jobs:
         uv run mypy src/
 
   deploy-test-pypi:
-    needs: test
     runs-on: ubuntu-latest
-    if: (success() || failure()) && github.event_name == 'push' && github.ref == 'refs/heads/test-pypi'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/test-pypi' && (needs.test.result == 'success' || needs.test.result == 'skipped')
+    needs: test
     environment: test-pypi
     permissions:
       id-token: write
@@ -81,9 +81,9 @@ jobs:
         python -c "import pyaibridge; print(f'✅ TestPyPI deployment successful: v{pyaibridge.__version__}')"
 
   deploy-production:
-    needs: test
     runs-on: ubuntu-latest
-    if: (success() || failure()) && github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && (needs.test.result == 'success' || needs.test.result == 'skipped')
+    needs: test
     environment: pypi
     permissions:
       id-token: write
