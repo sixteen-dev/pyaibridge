@@ -1,0 +1,126 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pyaibridge"
+version = "0.2.2"
+description = "High-performance unified API for all LLM providers"
+readme = "README.md"
+authors = [{name = "Sixteen Dev", email = "sujeeth.data@gmail.com"}]
+license = {text = "MIT"}
+requires-python = ">=3.9"
+dependencies = [
+    "httpx>=0.25.0",
+    "pydantic>=2.0.0",
+    "tenacity>=8.0.0",
+    "structlog>=23.0.0",
+    "typing-extensions>=4.0.0",
+]
+classifiers = [
+    "Development Status :: 1 - Planning",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+[project.urls]
+Homepage = "https://github.com/sixteen-dev/pyaibridge"
+Repository = "https://github.com/sixteen-dev/pyaibridge"
+
+[tool.hatch.version]
+path = "src/pyaibridge/__init__.py"
+
+[dependency-groups]
+dev = [
+    "build>=1.2.2.post1",
+    "twine>=6.1.0",
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "aioresponses>=0.7.0",
+    "respx>=0.20.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+    "mypy>=1.0.0",
+    "pre-commit>=3.0.0",
+    "bandit>=1.8.6",
+    "safety>=3.6.0",
+    "pip-audit>=2.9.0",
+]
+security = [
+    "bandit[toml]>=1.7.5",
+    "safety>=3.0.0",
+    "pip-audit>=2.6.0",
+    "semgrep>=1.45.0",
+]
+
+[tool.black]
+line-length = 88
+target-version = ['py39']
+
+[tool.ruff]
+line-length = 88
+target-version = "py39"
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "UP", # pyupgrade
+]
+ignore = [
+    "E501",  # line too long, handled by black
+    "B008",  # do not perform function calls in argument defaults
+    "C901",  # too complex
+    "UP045", # Use `X | None` for type annotations - conflicts with Python 3.9 support
+    "UP007", # Use `X | Y` for type annotations - conflicts with Python 3.9 support
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+
+[tool.mypy]
+python_version = "3.9"
+check_untyped_defs = true
+disallow_any_generics = true
+disallow_untyped_defs = true
+follow_imports = "silent"
+strict_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+
+[tool.bandit]
+exclude_dirs = ["tests", "examples"]
+skips = ["B101", "B601"]  # Skip assert_used and shell_injection_process for tests
+
+[tool.bandit.any_other_function_with_shell_equals_true]
+no_shell = [
+    "os.execl",
+    "os.execle", 
+    "os.execlp",
+    "os.execlpe",
+    "os.execv",
+    "os.execve",
+    "os.execvp",
+    "os.execvpe",
+    "os.spawnl",
+    "os.spawnle",
+    "os.spawnlp",
+    "os.spawnlpe",
+    "os.spawnv",
+    "os.spawnve",
+    "os.spawnvp",
+    "os.spawnvpe",
+    "os.startfile"
+]
