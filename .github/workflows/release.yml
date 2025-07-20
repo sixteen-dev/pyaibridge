@@ -22,6 +22,9 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
+    - name: Set up Rust
+      uses: dtolnay/rust-toolchain@stable
+    
     - name: Install uv
       uses: astral-sh/setup-uv@v3
       with:
@@ -33,6 +36,9 @@ jobs:
     
     - name: Install dependencies
       run: uv sync --all-extras --dev
+    
+    - name: Build Rust extension for testing
+      run: uv run maturin develop
     
     - name: Run package tests
       run: uv run python scripts/test_package.py
@@ -51,28 +57,106 @@ jobs:
         uv run ruff check src/
         uv run mypy src/
 
+  build-wheels:
+    runs-on: ${{ matrix.platform.runner }}
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/test-pypi' || github.ref == 'refs/heads/main')
+    strategy:
+      matrix:
+        platform:
+          - runner: ubuntu-latest
+            target: x86_64
+          - runner: ubuntu-latest
+            target: aarch64
+          - runner: windows-latest
+            target: x64
+          - runner: macos-12
+            target: x86_64
+          - runner: macos-14
+            target: aarch64
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        targets: ${{ matrix.platform.target }}
+    
+    - name: Install uv
+      uses: astral-sh/setup-uv@v3
+    
+    - name: Set up Python
+      run: uv python install ${{ env.PYTHON_VERSION }}
+    
+    - name: Install dependencies
+      run: uv sync --dev
+    
+    - name: Build wheels
+      uses: PyO3/maturin-action@v1
+      with:
+        target: ${{ matrix.platform.target }}
+        args: --release --out dist --find-interpreter
+        sccache: 'true'
+        manylinux: auto
+    
+    - name: Upload wheels
+      uses: actions/upload-artifact@v4
+      with:
+        name: wheels-${{ matrix.platform.runner }}-${{ matrix.platform.target }}
+        path: dist
+
+  build-sdist:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/test-pypi' || github.ref == 'refs/heads/main')
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Rust
+      uses: dtolnay/rust-toolchain@stable
+    
+    - name: Install uv
+      uses: astral-sh/setup-uv@v3
+    
+    - name: Set up Python
+      run: uv python install ${{ env.PYTHON_VERSION }}
+    
+    - name: Install dependencies
+      run: uv sync --dev
+    
+    - name: Build source distribution
+      uses: PyO3/maturin-action@v1
+      with:
+        command: sdist
+        args: --out dist
+    
+    - name: Upload sdist
+      uses: actions/upload-artifact@v4
+      with:
+        name: sdist
+        path: dist
+
   deploy-test-pypi:
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/test-pypi'
     environment: test-pypi
     permissions:
       id-token: write
+    needs: [build-wheels, build-sdist]
     
     steps:
-    - uses: actions/checkout@v4
-    - name: Install uv
-      uses: astral-sh/setup-uv@v3
-    - name: Set up Python
-      run: uv python install ${{ env.PYTHON_VERSION }}
-    - name: Install dependencies
-      run: uv sync --dev
-    - name: Build package
-      run: uv build
+    - name: Download wheels
+      uses: actions/download-artifact@v4
+      with:
+        path: dist
+        merge-multiple: true
+    
     - name: Publish to TestPyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         repository-url: https://test.pypi.org/legacy/
         verbose: true
+    
     - name: Test installation
       run: |
         sleep 60
@@ -86,22 +170,32 @@ jobs:
     permissions:
       id-token: write
       contents: write
+    needs: [build-wheels, build-sdist]
     
     steps:
     - uses: actions/checkout@v4
+    
     - name: Install uv
       uses: astral-sh/setup-uv@v3
+    
     - name: Set up Python
       run: uv python install ${{ env.PYTHON_VERSION }}
+    
     - name: Install dependencies
       run: uv sync --dev
-    - name: Build package
-      run: uv build
+    
+    - name: Download wheels
+      uses: actions/download-artifact@v4
+      with:
+        path: dist
+        merge-multiple: true
+    
     - name: Publish to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         verbose: true
         attestations: true
+    
     - name: Get version and create release
       id: version
       run: |
@@ -111,12 +205,15 @@ jobs:
         git config user.email "github-actions[bot]@users.noreply.github.com"
         git tag -a "v$VERSION" -m "Release $VERSION"
         git push origin "v$VERSION"
+    
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:
         tag_name: v${{ steps.version.outputs.version }}
         generate_release_notes: true
         make_latest: true
+        files: dist/*
+    
     - name: Sync wiki
       uses: Andrew-Chen-Wang/github-wiki-action@v4
       with:

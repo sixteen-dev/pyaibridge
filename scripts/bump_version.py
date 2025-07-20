@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Version bumping script for pyaibridge.
-Automatically updates version in __init__.py and pyproject.toml
+Automatically updates version in __init__.py, pyproject.toml, and rust/Cargo.toml
 """
 
 import argparse
@@ -87,6 +87,29 @@ def update_pyproject_toml(new_version: str) -> None:
     else:
         print("⚠️  No version found in pyproject.toml or using dynamic versioning")
 
+def update_cargo_toml(new_version: str) -> None:
+    """Update version in rust/Cargo.toml"""
+    cargo_file = Path("rust/Cargo.toml")
+    if not cargo_file.exists():
+        print("⚠️  rust/Cargo.toml not found, skipping")
+        return
+    
+    content = cargo_file.read_text()
+    
+    # Update the version in the [package] section
+    new_content = re.sub(
+        r'(\[package\][\s\S]*?^version\s*=\s*["\'])[^"\']+(["\'])',
+        f'\\g<1>{new_version}\\g<2>',
+        content,
+        flags=re.MULTILINE
+    )
+    
+    if content != new_content:
+        cargo_file.write_text(new_content)
+        print(f"✅ Updated rust/Cargo.toml: {new_version}")
+    else:
+        print("⚠️  No version found in rust/Cargo.toml")
+
 def update_test_file(new_version: str) -> None:
     """Update version in test file"""
     test_file = Path("tests/integration/test_package_functionality.py")
@@ -148,10 +171,12 @@ def main():
         # Update files
         update_init_file(new_version)
         update_pyproject_toml(new_version)
+        update_cargo_toml(new_version)
         update_test_file(new_version)
         
         print(f"🎉 Version successfully bumped to {new_version}")
         print("\n📝 Next steps:")
+        print(f"   cargo check  # Update Cargo.lock with new version")
         print(f"   git add .")
         print(f"   git commit -m 'chore: bump version to {new_version}'")
         print(f"   git tag v{new_version}")

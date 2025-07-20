@@ -27,6 +27,7 @@ from ..core.models import (
     StreamingChunk,
     Usage,
 )
+from ..http_client import HybridHttpClient
 
 logger = structlog.get_logger(__name__)
 
@@ -152,7 +153,7 @@ class ClaudeProvider(BaseProvider):
         """
         super().__init__(config)
         self.base_url = config.base_url or self.BASE_URL
-        self._client: httpx.AsyncClient | None = None
+        self._client: HybridHttpClient | None = None
 
         logger.info("Anthropic Claude provider initialized", base_url=self.base_url)
 
@@ -169,23 +170,16 @@ class ClaudeProvider(BaseProvider):
     async def connect(self) -> None:
         """Initialize HTTP client with connection pooling."""
         if self._client is None:
-            self._client = httpx.AsyncClient(
-                base_url=self.base_url,
-                timeout=httpx.Timeout(self.config.timeout),
-                limits=httpx.Limits(max_connections=100, max_keepalive_connections=20),
-                headers={
-                    "x-api-key": self.config.api_key,
-                    "content-type": "application/json",
-                    "anthropic-version": self.API_VERSION,
-                    "user-agent": "pyaibridge/0.1.1",
-                },
+            self._client = HybridHttpClient(
+                timeout=self.config.timeout,
             )
+            await self._client.connect()
             logger.info("Anthropic Claude client connected")
 
     async def disconnect(self) -> None:
         """Clean up HTTP client."""
         if self._client:
-            await self._client.aclose()
+            await self._client.disconnect()
             self._client = None
             logger.info("Anthropic Claude client disconnected")
 
@@ -224,33 +218,41 @@ class ClaudeProvider(BaseProvider):
                 stream=request.stream,
             )
 
-            response = await self._client.post("/messages", json=payload)
+            url = f"{self.base_url}/messages"
+            headers = {
+                "x-api-key": self.config.api_key,
+                "content-type": "application/json",
+                "anthropic-version": self.API_VERSION,
+                "user-agent": "pyaibridge/0.2.3",
+            }
+            response = await self._client.post(url=url, json_data=payload, headers=headers, stream=False)
+            assert isinstance(response, dict), "Expected dict response for non-streaming request"
 
-            if response.status_code == 401:
+            if response["status_code"] == 401:
                 raise AuthenticationError("Invalid API key", "claude")
-            elif response.status_code == 429:
-                retry_after = response.headers.get("retry-after")
+            elif response["status_code"] == 429:
+                retry_after = response["headers"].get("retry-after")
                 raise RateLimitError(
                     "Rate limit exceeded",
                     "claude",
                     retry_after=float(retry_after) if retry_after else None,
                 )
-            elif response.status_code == 400:
-                error_data = response.json() if response.content else {}
+            elif response["status_code"] == 400:
+                error_data = response["json"] if response["json"] else {}
                 raise ValidationError(
                     f"Bad request: {error_data.get('error', {}).get('message', 'Unknown error')}",
                     "claude"
                 )
-            elif response.status_code != 200:
-                error_data = response.json() if response.content else {}
+            elif response["status_code"] != 200:
+                error_data = response["json"] if response["json"] else {}
                 raise ProviderError(
-                    f"Anthropic Claude API error: {response.status_code}",
+                    f"Anthropic Claude API error: {response['status_code']}",
                     "claude",
-                    response.status_code,
+                    response["status_code"],
                     error_data,
                 )
 
-            data = response.json()
+            data = response["json"]
             return self._parse_response(data, request.model)
 
         except httpx.TimeoutException as e:
@@ -276,31 +278,30 @@ class ClaudeProvider(BaseProvider):
         try:
             logger.info("Making Anthropic Claude streaming request", model=request.model)
 
-            async with self._client.stream("POST", "/messages", json=payload) as response:
-                if response.status_code == 401:
-                    raise AuthenticationError("Invalid API key", "claude")
-                elif response.status_code == 429:
-                    retry_after = response.headers.get("retry-after")
-                    raise RateLimitError(
-                        "Rate limit exceeded",
-                        "claude",
-                        retry_after=float(retry_after) if retry_after else None,
-                    )
-                elif response.status_code != 200:
-                    error_data = await response.aread()
-                    raise ProviderError(
-                        f"Anthropic Claude API error: {response.status_code}",
-                        "claude",
-                        response.status_code,
-                        {"error": error_data.decode()},
-                    )
+            url = f"{self.base_url}/messages"
+            headers = {
+                "x-api-key": self.config.api_key,
+                "content-type": "application/json",
+                "anthropic-version": self.API_VERSION,
+                "user-agent": "pyaibridge/0.2.3",
+            }
 
-                async for line in response.aiter_lines():
+            stream_response = await self._client.post(
+                url=url,
+                json_data=payload,
+                headers=headers,
+                stream=True
+            )
+            assert hasattr(stream_response, '__aiter__'), "Expected async generator for streaming request"
+
+            async for chunk_text in stream_response:
+                # Parse Server-Sent Events format
+                for line in chunk_text.split('\n'):
                     if line.startswith("data: "):
                         data_str = line[6:]  # Remove "data: " prefix
 
                         if data_str.strip() == "[DONE]":
-                            break
+                            return
 
                         try:
                             data = json.loads(data_str)

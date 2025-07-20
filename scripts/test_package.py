@@ -256,9 +256,15 @@ def test_package_build():
     """Test package building."""
     print_status("Testing package build...", "info")
     
-    success, _ = run_command("uv build", "Package build")
+    # Build Rust extension first
+    success, _ = run_command("uv run maturin develop", "Rust extension build")
+    if not success:
+        return False
+    
+    # Build wheels with maturin
+    success, _ = run_command("uv run maturin build --release", "Maturin wheel build")
     if success:
-        success, _ = run_command("uv run twine check dist/*", "Package validation")
+        success, _ = run_command("uv run twine check target/wheels/*", "Package validation")
     
     return success
 
