@@ -2,6 +2,10 @@
 name = "pyaibridge-core"
 version = "0.3.0"
 edition = "2021"
+description = "High-performance unified API for all LLM providers - Rust core"
+license = "MIT"
+repository = "https://github.com/sixteen-dev/pyaibridge"
+homepage = "https://github.com/sixteen-dev/pyaibridge"
 
 [lib]
 name = "pyaibridge_core"
