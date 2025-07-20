@@ -65,8 +65,9 @@ jobs:
         platform:
           - runner: ubuntu-latest
             target: x86_64-unknown-linux-gnu
-          - runner: ubuntu-latest
-            target: aarch64-unknown-linux-gnu
+          # TODO: Re-enable ARM64 Linux after fixing ring crate cross-compilation
+          # - runner: ubuntu-latest
+          #   target: aarch64-unknown-linux-gnu
           - runner: windows-latest
             target: x86_64-pc-windows-msvc
           - runner: macos-12
@@ -82,11 +83,6 @@ jobs:
       with:
         targets: ${{ matrix.platform.target }}
     
-    - name: Set up cross-compilation (ARM64 Linux only)
-      if: matrix.platform.target == 'aarch64-unknown-linux-gnu'
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y gcc-aarch64-linux-gnu
     
     - name: Install uv
       uses: astral-sh/setup-uv@v3
