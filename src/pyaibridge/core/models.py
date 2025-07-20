@@ -6,7 +6,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Optional, Union
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator
 
 
 class MessageRole(str, Enum):
@@ -90,7 +90,9 @@ class ChatResponse(BaseModel):
         default_factory=dict, description="Additional metadata"
     )
 
-    model_config = ConfigDict(json_encoders={datetime: lambda v: v.isoformat()})
+    @field_serializer('created')
+    def serialize_created(self, value: datetime) -> str:
+        return value.isoformat()
 
 
 class StreamingChunk(BaseModel):
@@ -107,7 +109,9 @@ class StreamingChunk(BaseModel):
         default_factory=dict, description="Additional metadata"
     )
 
-    model_config = ConfigDict(json_encoders={datetime: lambda v: v.isoformat()})
+    @field_serializer('created')
+    def serialize_created(self, value: datetime) -> str:
+        return value.isoformat()
 
 
 class ProviderConfig(BaseModel):

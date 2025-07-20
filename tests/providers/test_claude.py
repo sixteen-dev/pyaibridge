@@ -1,9 +1,5 @@
 """Tests for Claude provider."""
 
-import json
-import uuid
-from datetime import datetime
-from unittest.mock import AsyncMock
 
 import httpx
 import pytest
@@ -33,7 +29,14 @@ def provider_config():
 @pytest.fixture
 def claude_provider(provider_config):
     """Create a Claude provider for testing."""
-    return ClaudeProvider(provider_config)
+    provider = ClaudeProvider(provider_config)
+    # Override the HTTP client creation to use httpx for testing (to work with respx mocks)
+    async def mock_connect():
+        from pyaibridge.http_client import HybridHttpClient
+        provider._client = HybridHttpClient(timeout=provider.config.timeout, use_rust=False)
+        await provider._client.connect()
+    provider.connect = mock_connect
+    return provider
 
 
 @pytest.fixture
@@ -82,21 +85,21 @@ class TestClaudeProvider:
     def test_supported_models(self, claude_provider):
         """Test supported models configuration."""
         models = claude_provider.supported_models
-        
+
         # Check Claude 4 series
         assert "claude-opus-4-20250514" in models
         assert "claude-sonnet-4-20250514" in models
         assert "claude-3-5-haiku-20241022" in models  # Use 3.5 haiku instead of removed 4-haiku
-        
+
         # Check Claude 3.5 series
         assert "claude-3-5-sonnet-20241022" in models
         assert "claude-3-5-haiku-20241022" in models
-        
+
         # Check Claude 3 series
         assert "claude-3-opus-20240229" in models
         assert "claude-3-sonnet-20240229" in models
         assert "claude-3-haiku-20240307" in models
-        
+
         # Verify model configurations
         claude_opus_4 = models["claude-opus-4-20250514"]
         assert claude_opus_4["context_length"] == 200000
@@ -110,7 +113,7 @@ class TestClaudeProvider:
         # Valid models
         assert await claude_provider.validate_model("claude-3-5-sonnet-20241022") is True
         assert await claude_provider.validate_model("claude-opus-4-20250514") is True
-        
+
         # Invalid model
         assert await claude_provider.validate_model("invalid-model") is False
 
@@ -118,18 +121,16 @@ class TestClaudeProvider:
         """Test connection lifecycle."""
         # Initially not connected
         assert claude_provider._client is None
-        
+
         # Connect
         await claude_provider.connect()
         assert claude_provider._client is not None
-        assert isinstance(claude_provider._client, httpx.AsyncClient)
-        
-        # Check headers
-        headers = claude_provider._client.headers
-        assert headers["x-api-key"] == "test-api-key"
-        assert headers["anthropic-version"] == "2023-06-01"
-        assert headers["content-type"] == "application/json"
-        
+        # Import here to avoid circular imports
+        from pyaibridge.http_client import HybridHttpClient
+        assert isinstance(claude_provider._client, HybridHttpClient)
+
+        # Note: Headers are set per-request in HybridHttpClient, not as client defaults
+
         # Disconnect
         await claude_provider.disconnect()
         assert claude_provider._client is None
@@ -137,7 +138,7 @@ class TestClaudeProvider:
     def test_build_payload_basic(self, claude_provider, chat_request):
         """Test basic payload building."""
         payload = claude_provider._build_payload(chat_request)
-        
+
         assert payload["model"] == "claude-3-5-sonnet-20241022"
         assert payload["max_tokens"] == 100
         assert payload["temperature"] == 0.7
@@ -154,9 +155,9 @@ class TestClaudeProvider:
             ],
             model="claude-3-5-sonnet-20241022",
         )
-        
+
         payload = claude_provider._build_payload(request)
-        
+
         # System message should be in system field, not in messages
         assert "system" in payload
         assert payload["system"] == "You are a helpful assistant."
@@ -173,9 +174,9 @@ class TestClaudeProvider:
             ],
             model="claude-3-5-sonnet-20241022",
         )
-        
+
         payload = claude_provider._build_payload(request)
-        
+
         # Multiple system messages should be joined
         assert payload["system"] == "You are helpful.\n\nBe concise."
 
@@ -186,10 +187,10 @@ class TestClaudeProvider:
             model="claude-3-5-sonnet-20241022",
             stop=["STOP", "END"],
         )
-        
+
         payload = claude_provider._build_payload(request)
         assert payload["stop_sequences"] == ["STOP", "END"]
-        
+
         # Test single stop string
         request.stop = "STOP"
         payload = claude_provider._build_payload(request)
@@ -204,7 +205,7 @@ class TestClaudeProvider:
     def test_parse_response(self, claude_provider, claude_response):
         """Test response parsing."""
         response = claude_provider._parse_response(claude_response, "claude-3-5-sonnet-20241022")
-        
+
         assert response.id == "msg_123456789"
         assert response.model == "claude-3-5-sonnet-20241022"
         assert response.content == "Hello! How can I help you today?"
@@ -224,14 +225,14 @@ class TestClaudeProvider:
             ],
             "usage": {"input_tokens": 10, "output_tokens": 5}
         }
-        
+
         response = claude_provider._parse_response(response_data, "claude-3-5-sonnet-20241022")
         assert response.content == "First part. Second part."
 
     def test_parse_response_no_content(self, claude_provider):
         """Test parsing response with no content."""
         response_data = {"id": "msg_123"}
-        
+
         with pytest.raises(ProviderError, match="No content in response"):
             claude_provider._parse_response(response_data, "claude-3-5-sonnet-20241022")
 
@@ -244,9 +245,9 @@ class TestClaudeProvider:
                 "text": "Hello"
             }
         }
-        
+
         chunk = claude_provider._parse_streaming_chunk(chunk_data, "claude-3-5-sonnet-20241022")
-        
+
         assert chunk is not None
         assert chunk.content == "Hello"
         assert chunk.finish_reason is None
@@ -260,9 +261,9 @@ class TestClaudeProvider:
                 "stop_reason": "end_turn"
             }
         }
-        
+
         chunk = claude_provider._parse_streaming_chunk(chunk_data, "claude-3-5-sonnet-20241022")
-        
+
         assert chunk is not None
         assert chunk.content == ""
         assert chunk.finish_reason == "end_turn"
@@ -270,7 +271,7 @@ class TestClaudeProvider:
     def test_parse_streaming_chunk_invalid(self, claude_provider):
         """Test parsing invalid streaming chunk."""
         chunk_data = {"type": "unknown", "data": "something"}
-        
+
         chunk = claude_provider._parse_streaming_chunk(chunk_data, "claude-3-5-sonnet-20241022")
         assert chunk is None
 
@@ -281,9 +282,9 @@ class TestClaudeProvider:
         respx.post("https://api.anthropic.com/v1/messages").mock(
             return_value=httpx.Response(200, json=claude_response)
         )
-        
+
         response = await claude_provider.chat(chat_request)
-        
+
         assert response.content == "Hello! How can I help you today?"
         assert response.model == "claude-3-5-sonnet-20241022"
         assert response.usage.prompt_tokens == 12
@@ -296,7 +297,7 @@ class TestClaudeProvider:
             messages=[Message(role=MessageRole.USER, content="Hello!")],
             model="invalid-model",
         )
-        
+
         with pytest.raises(ValidationError, match="Model 'invalid-model' is not supported"):
             await claude_provider.chat(request)
 
@@ -306,7 +307,7 @@ class TestClaudeProvider:
         respx.post("https://api.anthropic.com/v1/messages").mock(
             return_value=httpx.Response(401, json={"error": {"message": "Invalid API key"}})
         )
-        
+
         with pytest.raises(AuthenticationError, match="Invalid API key"):
             await claude_provider.chat(chat_request)
 
@@ -320,10 +321,10 @@ class TestClaudeProvider:
                 json={"error": {"message": "Rate limit exceeded"}}
             )
         )
-        
+
         with pytest.raises(RateLimitError, match="Rate limit exceeded") as exc_info:
             await claude_provider.chat(chat_request)
-        
+
         assert exc_info.value.retry_after == 60.0
 
     @respx.mock
@@ -335,11 +336,11 @@ class TestClaudeProvider:
                 "message": "Invalid parameter"
             }
         }
-        
+
         respx.post("https://api.anthropic.com/v1/messages").mock(
             return_value=httpx.Response(400, json=error_response)
         )
-        
+
         with pytest.raises(ValidationError, match="Bad request: Invalid parameter"):
             await claude_provider.chat(chat_request)
 
@@ -349,7 +350,7 @@ class TestClaudeProvider:
         respx.post("https://api.anthropic.com/v1/messages").mock(
             return_value=httpx.Response(500, json={"error": {"message": "Internal server error"}})
         )
-        
+
         with pytest.raises(ProviderError, match="Anthropic Claude API error: 500"):
             await claude_provider.chat(chat_request)
 
@@ -369,7 +370,7 @@ class TestClaudeProvider:
         """Test provider as async context manager."""
         async with claude_provider:
             assert claude_provider._client is not None
-        
+
         # Should be disconnected after context
         assert claude_provider._client is None
 
@@ -385,12 +386,12 @@ class TestClaudeProvider:
             "content": [{"type": "text", "text": "Test response"}],
             "usage": {"input_tokens": 100, "output_tokens": 50}
         }
-        
+
         response = claude_provider._parse_response(response_data, model)
-        
+
         model_config = claude_provider.SUPPORTED_MODELS[model]
         prompt_cost = response.usage.prompt_tokens * model_config["pricing"]["prompt_per_token"]
         completion_cost = response.usage.completion_tokens * model_config["pricing"]["completion_per_token"]
         total_cost = prompt_cost + completion_cost
-        
+
         assert abs(total_cost - expected_cost) < 1e-10

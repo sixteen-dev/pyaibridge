@@ -239,6 +239,9 @@ class OpenAIProvider(BaseProvider):
             data = response["json"]
             return self._parse_response(data)
 
+        except (AuthenticationError, RateLimitError, ValidationError, ProviderError):
+            # Re-raise specific exceptions as-is
+            raise
         except Exception as e:
             raise ProviderError(f"Request failed: {e}", "openai") from e
 

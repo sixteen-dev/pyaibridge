@@ -91,6 +91,8 @@ ignore = [
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+testpaths = ["tests"]
+norecursedirs = ["dev", ".git", ".venv", "build", "dist"]
 
 [tool.mypy]
 python_version = "3.9"
