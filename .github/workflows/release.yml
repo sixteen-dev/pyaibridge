@@ -99,7 +99,8 @@ jobs:
         PYO3_USE_ABI3_FORWARD_COMPATIBILITY: "1"
       with:
         target: ${{ matrix.platform.target }}
-        args: --release --out dist --find-interpreter
+        # Skip PyPy 3.11+ as PyO3 0.20 only supports up to PyPy 3.10
+        args: --release --out dist --find-interpreter --skip pp311 --skip pp312
         sccache: 'true'
         manylinux: auto
     
