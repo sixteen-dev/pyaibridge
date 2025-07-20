@@ -8,7 +8,7 @@ version = "0.3.0"
 description = "High-performance unified API for all LLM providers"
 readme = "README.md"
 authors = [{name = "Sixteen Dev", email = "sujeeth.data@gmail.com"}]
-license = {text = "MIT"}
+license = {file = "LICENSE"}
 requires-python = ">=3.9"
 dependencies = [
     "httpx>=0.25.0",
@@ -35,6 +35,7 @@ Repository = "https://github.com/sixteen-dev/pyaibridge"
 [tool.maturin]
 module-name = "pyaibridge.pyaibridge_core"
 python-source = "src"
+include = ["LICENSE", "README.md"]
 
 [dependency-groups]
 dev = [
