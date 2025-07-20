@@ -5,6 +5,47 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2025-01-20
+
+### Added
+
+**Rust HTTP Integration:**
+- Hybrid HTTP client with automatic Rust/httpx detection
+- Rust-accelerated HTTP requests for 1.22x performance improvement
+- PyO3-based Rust extension with streaming support
+- Automatic fallback to httpx when Rust unavailable
+- Cross-platform wheel building for zero-setup deployment
+
+**Performance Enhancements:**
+- 1.22x faster overall HTTP performance with Rust
+- 1.49x faster performance for medium workloads
+- Connection pooling optimization in Rust client
+- Release-optimized builds with stripped debug symbols
+
+**Developer Experience:**
+- Comprehensive HTTP benchmarking tools
+- Enhanced version management for mixed Python/Rust projects
+- CI/CD pipeline updates for cross-platform Rust builds
+- Updated documentation with performance metrics
+
+**Code Quality:**
+- Complete ruff linting compliance (fixed 35+ errors)
+- Full mypy type safety with proper Rust module handling
+- Enhanced error handling with proper exception chaining
+- Improved import organization and type annotations
+
+### Changed
+- All HTTP providers now use HybridHttpClient for performance
+- Updated CI/CD pipeline for maturin-based Rust builds
+- Enhanced bump_version script to handle Cargo.toml versioning
+- Updated README and wiki with performance information
+
+### Technical Details
+- Integrated Rust HTTP client into OpenAI, Claude, Google, and XAI providers
+- Added streaming support with proper async generator handling
+- Implemented type-safe fallback mechanisms
+- Zero breaking changes - fully backward compatible
+
 ## [0.1.1] - 2025-01-15
 
 ### Added

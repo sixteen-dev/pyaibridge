@@ -4,10 +4,10 @@ Comprehensive package testing script.
 Tests all functionalities before deployment.
 """
 
-import sys
 import subprocess
+import sys
 import time
-from pathlib import Path
+
 
 # Colors for output
 class Colors:
@@ -62,7 +62,7 @@ def run_command(cmd, description, capture_output=True):
 def test_imports():
     """Test that all package components can be imported."""
     print_status("Testing package imports...", "info")
-    
+
     import_tests = [
         "import pyaibridge",
         "from pyaibridge.providers import OpenAIProvider, GoogleProvider, ClaudeProvider, XAIProvider",
@@ -70,7 +70,7 @@ def test_imports():
         "from pyaibridge.core.exceptions import ProviderError, AuthenticationError",
         "print('All imports successful')"
     ]
-    
+
     test_script = "; ".join(import_tests)
     success, output = run_command(f'python -c "{test_script}"', "Package imports")
     return success
@@ -78,7 +78,7 @@ def test_imports():
 def test_provider_initialization():
     """Test provider initialization."""
     print_status("Testing provider initialization...", "info")
-    
+
     test_script = '''
 import sys
 sys.path.insert(0, "src")
@@ -103,14 +103,14 @@ for name, provider in providers:
 
 print("All providers initialized successfully")
 '''
-    
+
     success, output = run_command(f"python -c '{test_script}'", "Provider initialization")
     return success
 
 def test_model_validation():
     """Test model validation."""
     print_status("Testing model validation...", "info")
-    
+
     test_script = r'''
 import sys
 import asyncio
@@ -141,14 +141,14 @@ async def test_validation():
 
 asyncio.run(test_validation())
 '''
-    
+
     success, _ = run_command(f"python -c '{test_script}'", "Model validation")
     return success
 
 def test_cost_calculation():
     """Test cost calculation functionality."""
     print_status("Testing cost calculation...", "info")
-    
+
     test_script = r'''
 import sys
 sys.path.insert(0, "src")
@@ -172,14 +172,14 @@ for name, provider, model in providers:
 
 print("Cost calculation tests passed")
 '''
-    
+
     success, _ = run_command(f"python -c '{test_script}'", "Cost calculation")
     return success
 
 def test_message_creation():
     """Test message and request creation."""
     print_status("Testing message creation...", "info")
-    
+
     test_script = r'''
 import sys
 sys.path.insert(0, "src")
@@ -207,7 +207,7 @@ assert request.temperature == 0.7
 
 print("Message and request creation working")
 '''
-    
+
     success, _ = run_command(f"python -c '{test_script}'", "Message creation")
     return success
 
@@ -220,59 +220,65 @@ def run_pytest():
 def run_security_checks():
     """Run security checks."""
     print_status("Running security checks...", "info")
-    
+
     checks = [
         ("echo 'Skipping bandit - not required'", "Bandit security scan (skipped)"),
         ("echo 'Skipping safety - not required'", "Safety vulnerability scan (skipped)"),
         ("echo 'Skipping pip-audit - not required'", "pip-audit dependency scan (skipped)")
     ]
-    
+
     all_passed = True
     for cmd, desc in checks:
         success, _ = run_command(cmd, desc)
         if not success:
             all_passed = False
-    
+
     return all_passed
 
 def run_code_quality_checks():
     """Run code quality checks."""
     print_status("Running code quality checks...", "info")
-    
+
     checks = [
         ("uv run --active ruff check src/ || echo 'Ruff check completed'", "Ruff linting"),
         ("uv run --active mypy src/ || echo 'MyPy check completed'", "MyPy type checking")
     ]
-    
+
     all_passed = True
     for cmd, desc in checks:
         success, _ = run_command(cmd, desc)
         if not success:
             all_passed = False
-    
+
     return all_passed
 
 def test_package_build():
     """Test package building."""
     print_status("Testing package build...", "info")
-    
-    success, _ = run_command("uv build", "Package build")
+
+    # Build Rust extension first
+    success, _ = run_command("uv run maturin develop", "Rust extension build")
+    if not success:
+        return False
+
+    # Build wheels with maturin
+    success, _ = run_command("uv run maturin build --release", "Maturin wheel build")
     if success:
-        success, _ = run_command("uv run twine check dist/*", "Package validation")
-    
+        success, _ = run_command("uv run twine check target/wheels/*", "Package validation")
+
     return success
 
 def main():
     """Run all tests."""
     print_status("🧪 Starting comprehensive package testing...", "header")
     print_status("=" * 60, "header")
-    
+
     test_results = []
-    
+
     # Test categories
     tests = [
         ("Package Imports", test_imports),
-        ("Provider Initialization", test_provider_initialization), 
+        ("Provider Initialization", test_provider_initialization),
         ("Model Validation", test_model_validation),
         ("Cost Calculation", test_cost_calculation),
         ("Message Creation", test_message_creation),
@@ -281,40 +287,40 @@ def main():
         ("Code Quality", run_code_quality_checks),
         ("Package Build", test_package_build)
     ]
-    
+
     for test_name, test_func in tests:
         print_status(f"\n🔍 {test_name}", "header")
         print("-" * 40)
-        
+
         try:
             result = test_func()
             test_results.append((test_name, result))
-            
+
             if result:
                 print_status(f"✅ {test_name} PASSED", "success")
             else:
                 print_status(f"❌ {test_name} FAILED", "error")
-                
+
         except Exception as e:
             print_status(f"❌ {test_name} ERROR: {e}", "error")
             test_results.append((test_name, False))
-        
+
         time.sleep(1)  # Brief pause between tests
-    
+
     # Summary
     print_status("\n" + "=" * 60, "header")
     print_status("📊 TEST SUMMARY", "header")
     print_status("=" * 60, "header")
-    
+
     passed = sum(1 for _, result in test_results if result)
     total = len(test_results)
-    
+
     for test_name, result in test_results:
         status = "✅" if result else "❌"
         print_status(f"{status} {test_name}")
-    
+
     print_status(f"\nResults: {passed}/{total} tests passed", "header")
-    
+
     if passed == total:
         print_status("🎉 ALL TESTS PASSED! Package is ready for deployment.", "success")
         return 0

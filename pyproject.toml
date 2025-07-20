@@ -1,10 +1,10 @@
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["maturin>=1.0,<2.0"]
+build-backend = "maturin"
 
 [project]
 name = "pyaibridge"
-version = "0.2.3"
+version = "0.3.0"
 description = "High-performance unified API for all LLM providers"
 readme = "README.md"
 authors = [{name = "Sixteen Dev", email = "sujeeth.data@gmail.com"}]
@@ -32,8 +32,9 @@ classifiers = [
 Homepage = "https://github.com/sixteen-dev/pyaibridge"
 Repository = "https://github.com/sixteen-dev/pyaibridge"
 
-[tool.hatch.version]
-path = "src/pyaibridge/__init__.py"
+[tool.maturin]
+module-name = "pyaibridge.pyaibridge_core"
+python-source = "src"
 
 [dependency-groups]
 dev = [
@@ -50,6 +51,7 @@ dev = [
     "bandit>=1.8.6",
     "safety>=3.6.0",
     "pip-audit>=2.9.0",
+    "maturin>=1.9.1",
 ]
 security = [
     "bandit[toml]>=1.7.5",
@@ -89,6 +91,8 @@ ignore = [
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+testpaths = ["tests"]
+norecursedirs = ["dev", ".git", ".venv", "build", "dist"]
 
 [tool.mypy]
 python_version = "3.9"

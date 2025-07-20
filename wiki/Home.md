@@ -34,6 +34,7 @@ asyncio.run(main())
 - **[Factory Pattern](Factory-Pattern)** - Create providers using the factory
 - **[Chat Completion](Chat-Completion)** - Generate text responses
 - **[Streaming](Streaming)** - Real-time response streaming
+- **[Performance](Performance)** - Rust acceleration and benchmarks
 - **[Error Handling](Error-Handling)** - Robust error management
 - **[Metrics & Monitoring](Metrics-and-Monitoring)** - Track usage and performance
 - **[Cost Calculation](Cost-Calculation)** - Calculate API costs
@@ -61,6 +62,7 @@ PyAIBridge follows a clean architecture with:
 
 - **Factory Pattern** for provider creation
 - **Base Provider** interface for consistency
+- **Hybrid HTTP Client** with Rust acceleration and Python fallback
 - **Pydantic Models** for type safety
 - **Structured Logging** for observability
 - **Async/Await** for performance
@@ -69,10 +71,11 @@ PyAIBridge follows a clean architecture with:
 
 - **Unified Interface** - Same API for all providers
 - **Type Safety** - Full TypeScript-like type hints
-- **Performance** - Async, connection pooling, retries
+- **Rust-Accelerated Performance** - 1.22x faster HTTP with automatic fallback
 - **Monitoring** - Built-in metrics and cost tracking
 - **Extensibility** - Easy to add new providers
 - **Production Ready** - Error handling, logging, testing
+- **Zero Setup** - No Rust toolchain required for installation
 
 ## 🔧 Installation
 

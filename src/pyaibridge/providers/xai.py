@@ -5,9 +5,8 @@ from __future__ import annotations
 import json
 from collections.abc import AsyncGenerator
 from datetime import datetime
-from typing import Any, NoReturn, Optional
+from typing import Any, Optional
 
-import httpx
 import structlog
 from tenacity import retry, stop_after_attempt, wait_exponential
 
@@ -26,6 +25,7 @@ from ..core.models import (
     StreamingChunk,
     Usage,
 )
+from ..http_client import HybridHttpClient
 
 logger = structlog.get_logger(__name__)
 
@@ -109,7 +109,7 @@ class XAIProvider(BaseProvider):
         """
         super().__init__(config)
         self.base_url = config.base_url or self.BASE_URL
-        self._client: httpx.AsyncClient | None = None
+        self._client: HybridHttpClient | None = None
 
         logger.info("xAI provider initialized", base_url=self.base_url)
 
@@ -126,22 +126,16 @@ class XAIProvider(BaseProvider):
     async def connect(self) -> None:
         """Initialize HTTP client with connection pooling."""
         if self._client is None:
-            self._client = httpx.AsyncClient(
-                base_url=self.base_url,
-                timeout=httpx.Timeout(self.config.timeout),
-                limits=httpx.Limits(max_connections=100, max_keepalive_connections=20),
-                headers={
-                    "Authorization": f"Bearer {self.config.api_key}",
-                    "Content-Type": "application/json",
-                    "User-Agent": "pyaibridge/0.0.1",
-                },
+            self._client = HybridHttpClient(
+                timeout=self.config.timeout,
             )
+            await self._client.connect()
             logger.info("xAI client connected")
 
     async def disconnect(self) -> None:
         """Clean up HTTP client."""
         if self._client:
-            await self._client.aclose()
+            await self._client.disconnect()
             self._client = None
             logger.info("xAI client disconnected")
 
@@ -268,13 +262,41 @@ class XAIProvider(BaseProvider):
             payload["user"] = request.user
 
         try:
+            url = f"{self.base_url}/chat/completions"
+            headers = {
+                "Authorization": f"Bearer {self.config.api_key}",
+                "Content-Type": "application/json",
+                "User-Agent": "pyaibridge/0.2.3",
+            }
+
             response = await self._client.post(
-                "/chat/completions",
-                json=payload,
-                timeout=request.timeout,
+                url=url,
+                json_data=payload,
+                headers=headers,
+                timeout=int(request.timeout or 30),
+                stream=False
             )
-            response.raise_for_status()
-            data = response.json()
+            assert isinstance(response, dict), "Expected dict response for non-streaming request"
+
+            if response["status_code"] == 401:
+                raise AuthenticationError("Invalid xAI API key", "xai")
+            elif response["status_code"] == 429:
+                retry_after = response["headers"].get("retry-after")
+                raise RateLimitError(
+                    "xAI rate limit exceeded",
+                    "xai",
+                    retry_after=float(retry_after) if retry_after else None,
+                )
+            elif response["status_code"] != 200:
+                error_data = response["json"] if response["json"] else {}
+                raise ProviderError(
+                    f"xAI API error ({response['status_code']}): {error_data.get('error', {}).get('message', 'Unknown error')}",
+                    "xai",
+                    response["status_code"],
+                    error_data,
+                )
+
+            data = response["json"]
 
             # Extract response data
             choice = data["choices"][0]
@@ -299,11 +321,6 @@ class XAIProvider(BaseProvider):
                 metadata={"provider": "xai"},
             )
 
-        except httpx.HTTPStatusError as e:
-            await self._handle_http_error(e)
-        except httpx.RequestError as e:
-            logger.error("xAI request error", error=str(e))
-            raise ProviderError(f"Request failed: {e}", "xai") from e
         except (KeyError, ValueError) as e:
             logger.error("xAI response parsing error", error=str(e))
             raise ProviderError(f"Invalid response format: {e}", "xai") from e
@@ -365,83 +382,56 @@ class XAIProvider(BaseProvider):
             payload["user"] = request.user
 
         try:
-            async with self._client.stream(
-                "POST",
-                "/chat/completions",
-                json=payload,
-                timeout=request.timeout,
-            ) as response:
-                response.raise_for_status()
+            url = f"{self.base_url}/chat/completions"
+            headers = {
+                "Authorization": f"Bearer {self.config.api_key}",
+                "Content-Type": "application/json",
+                "User-Agent": "pyaibridge/0.2.3",
+            }
 
-                async for line in response.aiter_lines():
-                    if not line.strip():
+            response = await self._client.post(
+                url=url,
+                json_data=payload,
+                headers=headers,
+                timeout=int(request.timeout or 30),
+                stream=True
+            )
+
+            # For streaming, response is an AsyncGenerator
+            assert hasattr(response, "__aiter__"), "Expected async generator for streaming request"
+
+            async for line in response:
+                if not line.strip():
+                    continue
+
+                if line.startswith("data: "):
+                    data_str = line[6:]  # Remove "data: " prefix
+
+                    if data_str.strip() == "[DONE]":
+                        break
+
+                    try:
+                        data = json.loads(data_str)
+                        choice = data["choices"][0]
+
+                        if choice.get("delta", {}).get("content"):
+                            content = choice["delta"]["content"]
+                            finish_reason = choice.get("finish_reason")
+
+                            yield StreamingChunk(
+                                id=data["id"],
+                                model=data["model"],
+                                content=content,
+                                finish_reason=finish_reason,
+                                created=datetime.now(),
+                                metadata={"provider": "xai"},
+                            )
+
+                    except json.JSONDecodeError:
+                        logger.warning("Failed to parse streaming chunk", line=line)
                         continue
 
-                    if line.startswith("data: "):
-                        data_str = line[6:]  # Remove "data: " prefix
-
-                        if data_str.strip() == "[DONE]":
-                            break
-
-                        try:
-                            data = json.loads(data_str)
-                            choice = data["choices"][0]
-
-                            if choice.get("delta", {}).get("content"):
-                                content = choice["delta"]["content"]
-                                finish_reason = choice.get("finish_reason")
-
-                                yield StreamingChunk(
-                                    id=data["id"],
-                                    model=data["model"],
-                                    content=content,
-                                    finish_reason=finish_reason,
-                                    created=datetime.now(),
-                                    metadata={"provider": "xai"},
-                                )
-
-                        except json.JSONDecodeError:
-                            logger.warning("Failed to parse streaming chunk", line=line)
-                            continue
-
-        except httpx.HTTPStatusError as e:
-            await self._handle_http_error(e)
-        except httpx.RequestError as e:
+        except Exception as e:
             logger.error("xAI streaming request error", error=str(e))
             raise ProviderError(f"Streaming request failed: {e}", "xai") from e
 
-    async def _handle_http_error(self, error: httpx.HTTPStatusError) -> NoReturn:
-        """Handle HTTP errors from xAI API.
-
-        Args:
-            error: The HTTP error to handle
-
-        Raises:
-            AuthenticationError: For 401 errors
-            RateLimitError: For 429 errors
-            ProviderError: For other errors
-        """
-        status_code = error.response.status_code
-        error_detail = "Unknown error"
-
-        try:
-            error_data = error.response.json()
-            if isinstance(error_data, dict):
-                error_detail = error_data.get("error", {}).get("message", str(error))
-            else:
-                error_detail = str(error_data)
-        except (ValueError, KeyError):
-            error_detail = str(error)
-
-        logger.error(
-            "xAI API error",
-            status_code=status_code,
-            error=error_detail,
-        )
-
-        if status_code == 401:
-            raise AuthenticationError("Invalid xAI API key", "xai")
-        elif status_code == 429:
-            raise RateLimitError("xAI rate limit exceeded", "xai")
-        else:
-            raise ProviderError(f"xAI API error ({status_code}): {error_detail}", "xai", status_code)
